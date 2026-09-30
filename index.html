@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>Bending Light — Web</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #101018; color: #cdd3e0;
+               font: 14px/1.5 "Helvetica Neue", Arial, sans-serif; }
+  .wrap { display: flex; flex-direction: column; align-items: center; gap: 10px;
+          padding: 16px 12px 40px; }
+  .main { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px;
+          align-items: flex-start; }
+  .stage { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .toggles { display: flex; gap: 18px; align-items: center; flex-wrap: wrap;
+             justify-content: center; }
+  .tgl { display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+         font-size: 12.5px; color: #aab3c8; user-select: none; }
+  .tgl input { display: none; }
+  .tgl .dot { width: 12px; height: 12px; border-radius: 50%; background: #1c2230;
+              border: 1px solid #39415a; display: inline-block; }
+  #tg-caus:checked + .dot { background: #4ce07a; border-color: #4ce07a; }
+  #tg-crit:checked + .dot { background: #ff5d5d; border-color: #ff5d5d; }
+  #tg-light:checked + .dot { background: #ff8c3a; border-color: #ff8c3a; }
+  #tg-src:checked + .dot { background: #ffffff; border-color: #ffffff; }
+  h1 { font-size: 20px; margin: 4px 0 0; color: #eef1f8; letter-spacing: 1px; }
+  canvas { background: #000; border: 1px solid #2c3242; max-width: min(768px, 96vw);
+           image-rendering: pixelated; cursor: crosshair; }
+  #status { color: #7c86a0; font-size: 12px; min-height: 16px; }
+  .help { width: 360px; max-width: 96vw; background: #161a24; border: 1px solid #262c3a;
+          border-radius: 8px; padding: 10px 16px; font-size: 12.5px; }
+  .help h2 { font-size: 13px; margin: 6px 0 2px; color: #9fb4ff; }
+  .help td { padding: 1px 8px 1px 0; vertical-align: top; }
+  .key { display: inline-block; background: #232a38; border: 1px solid #39415a;
+         border-bottom-width: 2px; border-radius: 4px; padding: 0 5px;
+         font: 11px/16px monospace; color: #dfe6ff; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>BENDING LIGHT</h1>
+  <div class="main">
+    <div class="stage">
+      <canvas id="screen" width="768" height="768"></canvas>
+      <div class="toggles">
+        <label class="tgl"><input type="checkbox" id="tg-src" checked><span class="dot"></span>源</label>
+        <label class="tgl"><input type="checkbox" id="tg-caus" checked><span class="dot"></span>焦散线</label>
+        <label class="tgl"><input type="checkbox" id="tg-crit" checked><span class="dot"></span>临界曲线</label>
+        <label class="tgl"><input type="checkbox" id="tg-light"><span class="dot"></span>透镜星系图像</label>
+      </div>
+      <div id="status">initialising…</div>
+    </div>
+    <div class="help">
+    <h2>Sources(源星系,左键 + 数字键 1–9)</h2>
+    <table>
+      <tr><td><span class="key">数字</span>+<span class="key">W</span>+左键(按住/点击)</td><td>源直接跟随鼠标位置(一一对应)</td></tr>
+      <tr><td><span class="key">数字</span>+<span class="key">S</span>+左键上下拖</td><td>改变源大小</td></tr>
+      <tr><td><span class="key">数字</span>+<span class="key">E</span>+左键拖动</td><td>横向=方位角,纵向=椭率</td></tr>
+      <tr><td><span class="key">=</span>+左键点击</td><td>在鼠标处添加源(最多 9 个)</td></tr>
+    </table>
+    <h2>Lenses(透镜,右键 + 数字键 1–9)</h2>
+    <table>
+      <tr><td><span class="key">数字</span>+<span class="key">W</span>+右键拖动</td><td>移动透镜</td></tr>
+      <tr><td><span class="key">数字</span>+<span class="key">S</span>+右键拖动</td><td>纵向=爱因斯坦半径,横向=核半径/光度幅值</td></tr>
+      <tr><td><span class="key">数字</span>+<span class="key">E</span>+右键拖动</td><td>横向=方位角,纵向=轴比</td></tr>
+      <tr><td><span class="key">=</span>+右键点击</td><td>添加透镜(最多 9 个)</td></tr>
+      <tr><td><span class="key">-</span>+右键</td><td>删除最后一个源和最后一个透镜(原版行为)</td></tr>
+    </table>
+    <h2>显示</h2>
+    <table>
+      <tr><td><span class="key">F</span>(按住)</td><td>透镜形状轮廓 + 源 + 像</td></tr>
+      <tr><td><span class="key">G</span>(按住)</td><td>透镜光度 + 源 + 像</td></tr>
+      <tr><td>默认</td><td>源(白)+ 引力透镜像(蓝);画布下方圆点开关:源(白)、焦散线(绿)、临界曲线(红)、透镜星系图像(橙)</td></tr>
+    </table>
+    </div>
+  </div>
+</div>
+
+<!-- ==================================================================
+     Physics engine. Ported 1:1 from libs/all_cv_test.c (NIE deflections,
+     Gaussian sources, critical curves via magnification sign changes,
+     caustics via CIC deposit). This script executes on the main thread
+     AND its text is used verbatim as the source of every Web Worker.
+     Array layout: [row, col], row = x1 (vertical, screen y down),
+     col = x2 (horizontal, screen x right). Periodic wrap conventions
+     of the C code are preserved.
+     ================================================================== -->
+<script id="phys-src">
+const PHYS = (function () {
+  "use strict";
+
+  // ---- NIE deflection, accumulated into al1/al2 (port of lq_nie) --------
+  function addNie(al1, al2, lpar, xi1, xi2) {
+    const xc1 = lpar[0], xc2 = lpar[1], q = lpar[2], rc = lpar[3],
+          re = lpar[4], pha = lpar[5];
+    if (re === 0) return;                       // zero-strength lens: no-op
+    const phirad = pha * Math.PI / 180.0;
+    const cosa = Math.cos(phirad), sina = Math.sin(phirad);
+    const s1q = Math.sqrt(1.0 - q * q);
+    const fac = Math.sqrt(q) / s1q;
+    const rcq = rc / q, rcq2 = rc * q;
+    const N = xi1.length;
+    for (let i = 0; i < N; i++) {
+      const x1 = xi1[i], x2 = xi2[i];
+      const xt1 = (x1 - xc1) * cosa + (x2 - xc2) * sina;
+      const xt2 = (x2 - xc2) * cosa - (x1 - xc1) * sina;
+      const phi = Math.sqrt(xt2 * xt2 + xt1 * q * xt1 * q + rc * rc);
+      const a1 = fac * Math.atan(s1q * xt1 / (phi + rcq));
+      const a2 = fac * Math.atanh(s1q * xt2 / (phi + rcq2));
+      al1[i] += (a1 * cosa - a2 * sina) * re;
+      al2[i] += (a2 * cosa + a1 * sina) * re;
+    }
+  }
+
+  // ---- 2D Gaussian, accumulated (port of gauss_2d) ----------------------
+  function addGauss(out, par, xs1, xs2) {
+    const yc = par[0], xc = par[1], q = par[2], amp = par[3],
+          sig = par[4], pa = par[5];
+    if (amp === 0) return;
+    const phirad = pa * Math.PI / 180.0;
+    const c0 = Math.cos(phirad), s0 = Math.sin(phirad);
+    const inv2s2 = 0.5 / (sig * sig);
+    const N = xs1.length;
+    for (let i = 0; i < N; i++) {
+      const u = xs1[i] - yc, v = xs2[i] - xc;
+      const x1n = u * c0 + v * s0;
+      const x2n = v * c0 - u * s0;
+      out[i] += amp * Math.exp(-((x1n * x1n) * q + (x2n * x2n) / q) * inv2s2);
+    }
+  }
+
+  // ---- tophat boundary edges for one lens (port of mmbr_images) ---------
+  // xi1/xi2 cover (H+2) rows starting one row above the interior band.
+  function addTophatEdges(out, par, xi1, xi2, n, H) {
+    const yc = par[0], xc = par[1], q = par[2], sig = par[4], pa = par[5];
+    const phirad = pa * Math.PI / 180.0;
+    const c0 = Math.cos(phirad), s0 = Math.sin(phirad);
+    const HT = H + 2;
+    const mu = new Float64Array(HT * n);
+    for (let i = 0; i < HT * n; i++) {
+      const u = xi1[i] - yc, v = xi2[i] - xc;
+      const x1n = u * c0 + v * s0;
+      const x2n = v * c0 - u * s0;
+      const r = Math.sqrt((x1n * x1n) * q + (x2n * x2n) / q);
+      mu[i] = (r >= sig) ? -1.0 : 10000.0;
+    }
+    for (let r = 0; r < H; r++) {
+      const iC = (r + 1) * n, iU = (r + 2) * n, iD = r * n, o = r * n;
+      for (let c = 0; c < n; c++) {
+        const cp = c + 1 === n ? 0 : c + 1;
+        const cm = c === 0 ? n - 1 : c - 1;
+        const sC = Math.sign(mu[iC + c]);
+        const ss = Math.sign(mu[iU + c]) + Math.sign(mu[iD + c]) +
+                   Math.sign(mu[iC + cp]) + Math.sign(mu[iC + cm]);
+        if (sC * ss < 4) out[o + c] += 1.0;
+      }
+    }
+  }
+
+  // ---- one horizontal band of the full pipeline --------------------------
+  // rows [r0, r1) are this band's interior. Returns Float64Arrays of H*n:
+  //   sImg       sources evaluated on the image plane (true positions)
+  //   gImg       sources evaluated at the source-plane positions (lensed)
+  //   light      Gaussian light of the lenses
+  //   shapes     tophat "shape" outlines (0/1)
+  //   critical   critical-curve mask (0/1)
+  //   yi1, yi2   source-plane positions x1 - a1, x2 - a2
+  function computeBand(n, box, r0, r1, lpar, lpars, gpar, gpars, spar, spars) {
+    const H = r1 - r0;
+    const d = box / n;
+    const half = box / 2.0;
+    const HP = H + 4;                     // padded rows [r0-2, r1+2)
+    const NP = HP * n;
+
+    // padded coordinates (ghost rows wrap periodically)
+    const xi1 = new Float64Array(NP);
+    const xi2 = new Float64Array(NP);
+    for (let r = 0; r < HP; r++) {
+      const rr = ((r0 - 2 + r) % n + n) % n;
+      xi1.fill(-half + (rr + 0.5) * d, r * n, (r + 1) * n);
+      const xo = r * n;
+      for (let c = 0; c < n; c++) xi2[xo + c] = -half + (c + 0.5) * d;
+    }
+
+    // deflections: main lens + subhalos
+    const al1 = new Float64Array(NP);
+    const al2 = new Float64Array(NP);
+    addNie(al1, al2, lpar, xi1, xi2);
+    for (let k = 0; k < lpars.length; k++) addNie(al1, al2, lpars[k], xi1, xi2);
+
+    // magnification on rows [r0-1, r1+1): periodic central differences
+    //   imu = 1 - (d a2/dx2 + d a1/dx1) + ... = det(I - A)
+    const HI = H + 2;
+    const imu = new Float64Array(HI * n);
+    for (let r = 0; r < HI; r++) {
+      const iC = (r + 1) * n, iU = (r + 2) * n, iD = r * n, o = r * n;
+      for (let c = 0; c < n; c++) {
+        const cp = c + 1 === n ? 0 : c + 1;
+        const cm = c === 0 ? n - 1 : c - 1;
+        const dA1r = (al1[iU + c] - al1[iD + c]) / (2 * d);   // d a1/dx1
+        const dA1c = (al1[iC + cp] - al1[iC + cm]) / (2 * d); // d a1/dx2
+        const dA2r = (al2[iU + c] - al2[iD + c]) / (2 * d);   // d a2/dx1
+        const dA2c = (al2[iC + cp] - al2[iC + cm]) / (2 * d); // d a2/dx2
+        imu[o + c] = 1 - (dA2c + dA1r) + dA2c * dA1r - dA2r * dA1c;
+      }
+    }
+
+    // critical-curve mask (sign changes in the 4-neighbourhood)
+    const critical = new Float64Array(H * n);
+    for (let r = 0; r < H; r++) {
+      const iC = (r + 1) * n, iU = (r + 2) * n, iD = r * n, o = r * n;
+      for (let c = 0; c < n; c++) {
+        const cp = c + 1 === n ? 0 : c + 1;
+        const cm = c === 0 ? n - 1 : c - 1;
+        const sC = Math.sign(imu[iC + c]);
+        const ss = Math.sign(imu[iU + c]) + Math.sign(imu[iD + c]) +
+                   Math.sign(imu[iC + cp]) + Math.sign(imu[iC + cm]);
+        critical[o + c] = (sC * ss < 4) ? 1 : 0;
+      }
+    }
+
+    // interior views of the padded arrays
+    const xi1I = xi1.subarray(2 * n, 2 * n + H * n);
+    const xi2I = xi2.subarray(2 * n, 2 * n + H * n);
+
+    // source-plane positions
+    const yi1 = new Float64Array(H * n);
+    const yi2 = new Float64Array(H * n);
+    for (let i = 0; i < H * n; i++) {
+      yi1[i] = xi1I[i] - al1[2 * n + i];
+      yi2[i] = xi2I[i] - al2[2 * n + i];
+    }
+
+    // Gaussian images
+    const sImg = new Float64Array(H * n);
+    const gImg = new Float64Array(H * n);
+    const light = new Float64Array(H * n);
+    addGauss(sImg, spar, xi1I, xi2I);
+    for (let k = 0; k < spars.length; k++) addGauss(sImg, spars[k], xi1I, xi2I);
+    addGauss(gImg, spar, yi1, yi2);
+    for (let k = 0; k < spars.length; k++) addGauss(gImg, spars[k], yi1, yi2);
+    addGauss(light, gpar, xi1I, xi2I);
+    for (let k = 0; k < gpars.length; k++) addGauss(light, gpars[k], xi1I, xi2I);
+
+    // lens shape outlines
+    const shapes = new Float64Array(H * n);
+    const xi1T = xi1.subarray(n, n + (H + 2) * n);
+    const xi2T = xi2.subarray(n, n + (H + 2) * n);
+    addTophatEdges(shapes, gpar, xi1T, xi2T, n, H);
+    for (let k = 0; k < gpars.length; k++) addTophatEdges(shapes, gpars[k], xi1T, xi2T, n, H);
+    for (let i = 0; i < H * n; i++) shapes[i] = shapes[i] > 0 ? 1 : 0;
+
+    return { sImg: sImg, gImg: gImg, light: light, shapes: shapes,
+             critical: critical, yi1: yi1, yi2: yi2 };
+  }
+
+  // ---- CIC deposit -> caustic (port of forward_cic, main thread only) ---
+  // y1: x1 (row) source positions, y2: x2 (col), w: per-pixel weights.
+  function forwardCic(y1, y2, w, n, box) {
+    const d = box / n, half = box / 2.0;
+    const acc = new Float64Array(n * n);
+    for (let i = 0; i < n * n; i++) {
+      const wt = w[i];
+      if (wt <= 0) continue;
+      const rp = (y1[i] + half) / d - 0.5;      // row position (x1)
+      const cp = (y2[i] + half) / d - 0.5;      // col position (x2)
+      const r1 = Math.trunc(rp), c1 = Math.trunc(cp);
+      if (r1 < 0 || r1 > n - 2 || c1 < 0 || c1 > n - 2) continue;
+      const wy = 1 - (rp - r1), wx = 1 - (cp - c1);
+      acc[r1 * n + c1] += wx * wy * wt;
+      acc[(r1 + 1) * n + c1] += wx * (1 - wy) * wt;
+      acc[r1 * n + c1 + 1] += (1 - wx) * wy * wt;
+      acc[(r1 + 1) * n + c1 + 1] += (1 - wx) * (1 - wy) * wt;
+    }
+    const out = new Float64Array(n * n);
+    for (let i = 0; i < n * n; i++) out[i] = acc[i] > 0 ? 1 : 0;
+    return out;
+  }
+
+  return { computeBand: computeBand, forwardCic: forwardCic };
+})();
+</script>
+
+<!-- ==================================================================
+     Application: worker pool, interaction, rendering.
+     ================================================================== -->
+<script>
+(function () {
+  "use strict";
+  const n = 512, nnw = 768, box = 4.0, d = box / n;
+  const DELTA = 1e-8;
+  const N = n * n;
+
+  // ---------------- state (initial scene of bending_light.py) -----------
+  const lpar = [0.0, 0.0, 0.7, 0.1, 1.0, 0.0];          // main NIE lens
+  const gpar = [0.0, 0.0, 0.7, 1.0, 0.3, 0.0];          // main lens light
+  const lpars = [];                                      // subhalos (none)
+  const gpars = [];
+  const spar  = [0.0, 0.0, 1.0, 1.0, 0.02, 0.0];        // source 1
+  const spars = [];                                     // sources 2..9
+
+  const sFull = new Float64Array(N), gFull = new Float64Array(N);
+  const lightFull = new Float64Array(N), shapesFull = new Float64Array(N);
+  const critFull = new Float64Array(N), y1Full = new Float64Array(N);
+  const y2Full = new Float64Array(N);
+  let causFull = new Float64Array(N);
+
+  let mode = "default";         // "f" | "g" | "default"
+  let dirty = true, renderDirty = true, computing = false;
+  let computeMs = 0;
+
+  // ---------------- DOM -------------------------------------------------
+  const canvas = document.getElementById("screen");
+  const ctx = canvas.getContext("2d");
+  ctx.imageSmoothingEnabled = false;
+  const off = document.createElement("canvas");
+  off.width = n; off.height = n;
+  const offCtx = off.getContext("2d");
+  const img = offCtx.createImageData(n, n);
+  const statusEl = document.getElementById("status");
+
+  // ---------------- element visibility toggles ---------------------------
+  let showCaustics = true, showCritical = true, showLight = false,
+      showSource = true;
+  function bindToggle(id, set) {
+    const el = document.getElementById(id);
+    el.addEventListener("change", function () { set(el.checked); renderDirty = true; });
+  }
+  bindToggle("tg-caus", function (v) { showCaustics = v; });
+  bindToggle("tg-crit", function (v) { showCritical = v; });
+  bindToggle("tg-light", function (v) { showLight = v; });
+  bindToggle("tg-src", function (v) { showSource = v; });
+
+  // ---------------- worker pool -----------------------------------------
+  const physText = document.getElementById("phys-src").textContent;
+  const glue = "\n" +
+    "onmessage = function (e) {\n" +
+    "  var m = e.data;\n" +
+    "  var o = PHYS.computeBand(m.n, m.box, m.r0, m.r1, m.lpar, m.lpars, m.gpar, m.gpars, m.spar, m.spars);\n" +
+    "  postMessage({ r0: m.r0, r1: m.r1, o: o },\n" +
+    "    [o.sImg.buffer, o.gImg.buffer, o.light.buffer, o.shapes.buffer, o.critical.buffer, o.yi1.buffer, o.yi2.buffer]);\n" +
+    "};\n";
+  let workers = [];
+  try {
+    const wurl = URL.createObjectURL(new Blob([physText + glue], { type: "text/javascript" }));
+    const W = Math.max(1, Math.min(navigator.hardwareConcurrency || 4, 8));
+    for (let i = 0; i < W; i++) workers.push(new Worker(wurl));
+  } catch (err) { workers = []; }
+
+  function bandEdges() {
+    const W = Math.max(1, workers.length);
+    const es = [];
+    for (let i = 0; i < W; i++) {
+      const r0 = Math.floor(i * n / W), r1 = Math.floor((i + 1) * n / W);
+      if (r1 > r0) es.push([r0, r1]);
+    }
+    return es;
+  }
+
+  function computeViaWorkers() {
+    return new Promise(function (resolve) {
+      const es = bandEdges();
+      const results = new Array(es.length);
+      let pending = es.length;
+      es.forEach(function (e, k) {
+        const w = workers[k];
+        w.onmessage = function (ev) {
+          results[k] = ev.data;
+          if (--pending === 0) resolve(results);
+        };
+        w.postMessage({ n: n, box: box, r0: e[0], r1: e[1],
+                        lpar: lpar, lpars: lpars, gpar: gpar, gpars: gpars,
+                        spar: spar, spars: spars });
+      });
+    });
+  }
+
+  function computeOnMain() {
+    return bandEdges().map(function (e) {
+      const o = PHYS.computeBand(n, box, e[0], e[1], lpar, lpars, gpar, gpars, spar, spars);
+      return { r0: e[0], r1: e[1], o: o };
+    });
+  }
+
+  // ---------------- rendering (ports the uint8 combination of the app) ---
+  function u8(v) { return Math.trunc(v) & 255; }
+
+  function buildImage() {
+    const data = img.data;
+    for (let i = 0; i < N; i++) {
+      const s = sFull[i], g = gFull[i], li = lightFull[i],
+            sh = shapesFull[i], ca = causFull[i], cr = critFull[i];
+      let R, G, B;
+      if (mode === "f") {
+        R = (u8(sh * 255) + u8(s * 255) + u8(g * 102)) & 255;
+        G = (u8(sh * 255) + u8(s * 255) + u8(g * 178)) & 255;
+        B = (u8(sh * 255) + u8(s * 255) + u8(g * 255)) & 255;
+      } else if (mode === "g") {
+        const r0 = u8(li * 255), g0 = u8(li * 127), b0 = u8(li * 0);
+        const wr = (r0 + u8(s * 255) + u8(g * 102)) & 255;
+        const wg = (g0 + u8(s * 255) + u8(g * 178)) & 255;
+        const wb = (b0 + u8(s * 255) + u8(g * 255)) & 255;
+        R = wr >= r0 ? wr : r0;
+        G = wg >= g0 ? wg : g0;
+        B = wb >= b0 ? wb : b0;
+      } else {
+        const sv = showSource ? u8(s * 255) : 0;
+        R = (sv + u8(g * 102) + (showCritical ? u8(cr * 255) : 0)) & 255;
+        G = (sv + u8(g * 178) + (showCaustics ? u8(ca * 255) : 0)) & 255;
+        B = (sv + u8(g * 255)) & 255;
+        if (showLight) {
+          const r0 = u8(li * 255), g0 = u8(li * 127);
+          const wr = (R + r0) & 255, wg = (G + g0) & 255;
+          R = wr >= r0 ? wr : r0;
+          G = wg >= g0 ? wg : g0;
+        }
+      }
+      const p = i << 2;
+      data[p] = R; data[p + 1] = G; data[p + 2] = B; data[p + 3] = 255;
+    }
+    offCtx.putImageData(img, 0, 0);
+    ctx.drawImage(off, 0, 0, nnw, nnw);
+  }
+
+  // ---------------- recompute pipeline -----------------------------------
+  function recompute() {
+    computing = true;
+    dirty = false;
+    const t0 = performance.now();
+    const run = workers.length ? computeViaWorkers() : Promise.resolve(computeOnMain());
+    run.then(function (results) {
+      for (let b = 0; b < results.length; b++) {
+        const r = results[b], o = r.o, off0 = r.r0 * n;
+        sFull.set(o.sImg, off0);
+        gFull.set(o.gImg, off0);
+        lightFull.set(o.light, off0);
+        shapesFull.set(o.shapes, off0);
+        critFull.set(o.critical, off0);
+        y1Full.set(o.yi1, off0);
+        y2Full.set(o.yi2, off0);
+      }
+      causFull = PHYS.forwardCic(y1Full, y2Full, critFull, n, box);
+      computeMs = performance.now() - t0;
+      buildImage();
+      renderDirty = false;
+      computing = false;
+      statusEl.textContent = "grid " + n + "\u00d7" + n + "  |  lenses " +
+        (lpars.length + 1) + "  sources " + (spars.length + 1) +
+        "  |  " + (workers.length ? workers.length + " workers" : "main thread") +
+        "  |  physics " + computeMs.toFixed(0) + " ms";
+    }).catch(function () {
+      workers = [];                    // fall back permanently to main thread
+      computing = false;
+      dirty = true;
+    });
+  }
+
+  // ---------------- interaction (port of the pygame event loop) ---------
+  const keys = new Set();
+  let mouseL = false, mouseR = false, mx = 0, my = 0, accX = 0, accY = 0;
+
+  window.addEventListener("keydown", function (e) {
+    keys.add(e.code);
+    if (e.code === "Equal" || e.code === "Minus") e.preventDefault();
+  });
+  window.addEventListener("keyup", function (e) { keys.delete(e.code); });
+  window.addEventListener("blur", function () { keys.clear(); mouseL = mouseR = false; });
+
+  function toCanvas(e) {
+    const r = canvas.getBoundingClientRect();
+    const sc = nnw / r.width;
+    return [(e.clientX - r.left) * sc, (e.clientY - r.top) * sc];
+  }
+  canvas.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+  canvas.addEventListener("mousedown", function (e) {
+    if (e.button === 0) mouseL = true;
+    if (e.button === 2) mouseR = true;
+    const p = toCanvas(e); mx = p[0]; my = p[1];
+  });
+  window.addEventListener("mouseup", function (e) {
+    if (e.button === 0) mouseL = false;
+    if (e.button === 2) mouseR = false;
+  });
+  canvas.addEventListener("mouseleave", function () { mouseL = mouseR = false; });
+  canvas.addEventListener("mousemove", function (e) {
+    const p = toCanvas(e);
+    if (mx !== 0 || my !== 0) { accX += p[0] - mx; accY += p[1] - my; }
+    mx = p[0]; my = p[1];
+  });
+
+  function handleInteractions() {
+    const rotX = accX, rotY = accY;
+    accX = 0; accY = 0;
+    const moved = (rotX !== 0 || rotY !== 0);   // original required rotX only
+    const gx = (mx * n / nnw - n / 2.0) * d;    // physical coords at mouse
+    const gy = (my * n / nnw - n / 2.0) * d;
+
+    // ---- sources: add / delete
+    if (mouseL && keys.has("Equal") && spars.length < 8) {
+      spars.push([gy, gx, 1.0, 1.0, 0.02, 0.0]);
+      dirty = true;
+    }
+    if (mouseR && keys.has("Minus") && spars.length > 0) {
+      spars.pop();
+      dirty = true;
+    }
+
+    // ---- source 1
+    if (moved && mouseL && keys.has("KeyS") && keys.has("Digit1")) {
+      spar[4] -= rotY * 0.001;
+      if (spar[4] <= 0) spar[4] = DELTA;
+      if (spar[4] >= 1) spar[4] = 1.0 - DELTA;
+      dirty = true;
+    }
+    if (mouseL && keys.has("KeyW") && keys.has("Digit1")) {
+      spar[0] = gy; spar[1] = gx;            // source follows mouse 1:1
+      dirty = true;
+    }
+    if (moved && mouseL && keys.has("KeyE") && keys.has("Digit1")) {
+      spar[5] += rotX;
+      spar[2] += rotY * 0.002;
+      if (spar[2] <= 0.1) spar[2] = 0.1;
+      if (spar[2] >= 1) spar[2] = 1.0 - DELTA;
+      dirty = true;
+    }
+
+    // ---- sources 2..9
+    for (let i = 0; i < spars.length; i++) {
+      const k = "Digit" + (i + 2), sp = spars[i];
+      if (moved && mouseL && keys.has("KeyS") && keys.has(k)) {
+        sp[4] -= rotY * 0.001;
+        if (sp[4] <= 0) sp[4] = DELTA;
+        dirty = true;
+      }
+      if (mouseL && keys.has("KeyW") && keys.has(k)) {
+        sp[0] = gy; sp[1] = gx;              // source follows mouse 1:1
+        dirty = true;
+      }
+      if (moved && mouseL && keys.has("KeyE") && keys.has(k)) {
+        sp[5] += rotX;
+        sp[2] += rotY * 0.002;
+        if (sp[2] <= 0.3) sp[2] = 0.3;
+        if (sp[2] >= 1) sp[2] = 1.0 - DELTA;
+        dirty = true;
+      }
+    }
+
+    // ---- lenses: add / delete
+    if (mouseR && keys.has("Equal") && lpars.length < 8) {
+      lpars.push([gy, gx, 0.99999, 0.00001, 0.05, 0.0]);
+      gpars.push([gy, gx, 0.99999, 0.5, 0.1, 0.0]);
+      dirty = true;
+    }
+    if (mouseR && keys.has("Minus")) {
+      if (lpars.length > 0) lpars.pop();
+      if (gpars.length > 0) gpars.pop();
+      dirty = true;
+    }
+
+    // ---- subhalos 2..9
+    for (let i = 0; i < lpars.length; i++) {
+      const k = "Digit" + (i + 2), lp = lpars[i], gp = gpars[i];
+      if (moved && mouseR && keys.has("KeyS") && keys.has(k)) {
+        lp[3] += rotX * 0.002;
+        if (lp[3] <= 0) lp[3] = DELTA;
+        if (lp[3] >= 1) lp[3] = 1.0 - DELTA;
+        lp[4] -= rotY * 0.005;
+        if (lp[4] <= 0) lp[4] = DELTA;
+        gp[3] += rotX * 0.002;
+        if (gp[3] <= 0) gp[3] = DELTA;
+        if (gp[3] >= 1) gp[3] = 1.0 - DELTA;
+        gp[4] -= rotY * 0.005;
+        if (gp[4] <= 0) gp[4] = DELTA;
+        dirty = true;
+      }
+      if (moved && mouseR && keys.has("KeyW") && keys.has(k)) {
+        lp[1] += rotX * 0.01; lp[0] += rotY * 0.01;
+        gp[1] += rotX * 0.01; gp[0] += rotY * 0.01;
+        dirty = true;
+      }
+      if (moved && mouseR && keys.has("KeyE") && keys.has(k)) {
+        lp[5] += rotX;
+        lp[2] += rotY * 0.002;
+        if (lp[2] <= 0.3) lp[2] = 0.3;
+        if (lp[2] >= 1) lp[2] = 1.0 - DELTA;
+        gp[5] += rotX;
+        gp[2] += rotY * 0.002;
+        if (gp[2] <= 0.3) gp[2] = 0.3;
+        if (gp[2] >= 1) gp[2] = 1.0 - DELTA;
+        dirty = true;
+      }
+    }
+
+    // ---- main lens
+    if (moved && mouseR && keys.has("KeyS") && keys.has("Digit1")) {
+      lpar[3] += rotX * 0.002;
+      if (lpar[3] <= 0) lpar[3] = DELTA;
+      if (lpar[3] >= 1) lpar[3] = 1.0 - DELTA;
+      lpar[4] -= rotY * 0.005;
+      if (lpar[4] <= 0) lpar[4] = DELTA;
+      gpar[4] -= rotY * 0.005;
+      if (gpar[4] <= 0) gpar[4] = DELTA;
+      dirty = true;
+    }
+    if (moved && mouseR && keys.has("KeyW") && keys.has("Digit1")) {
+      lpar[1] += rotX * 0.01; lpar[0] += rotY * 0.01;
+      gpar[1] += rotX * 0.01; gpar[0] += rotY * 0.01;
+      dirty = true;
+    }
+    if (moved && mouseR && keys.has("KeyE") && keys.has("Digit1")) {
+      lpar[5] += rotX;
+      lpar[2] += rotY * 0.002;
+      if (lpar[2] <= 0.3) lpar[2] = 0.3;
+      if (lpar[2] >= 1) lpar[2] = 1.0 - DELTA;
+      gpar[5] += rotX;
+      gpar[2] += rotY * 0.002;
+      if (gpar[2] <= 0.3) gpar[2] = 0.3;
+      if (gpar[2] >= 1) gpar[2] = 1.0 - DELTA;
+      dirty = true;
+    }
+  }
+
+  // ---------------- main loop --------------------------------------------
+  function frame() {
+    requestAnimationFrame(frame);
+    handleInteractions();
+    const m = keys.has("KeyF") ? "f" : (keys.has("KeyG") ? "g" : "default");
+    if (m !== mode) { mode = m; renderDirty = true; }
+    if (renderDirty && !computing) { buildImage(); renderDirty = false; }
+    if (dirty && !computing) recompute();
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
