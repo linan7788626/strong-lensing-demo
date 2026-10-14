@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gravitational Lensing Playground — 星系透镜探险小游戏</title>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Variable 字体: 与仿真实验室页统一 -->
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/inter@5.2.5/index.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/jetbrains-mono@5.2.5/index.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/noto-sans-sc@5.2.5/index.min.css">
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          cyber: {
+            950: '#05070e',
+            900: '#090e1a',
+            850: '#0e1526',
+            800: '#141e34',
+            700: '#1f2c4c',
+            600: '#2e416e',
+            accent: '#38bdf8',
+            gold: '#fbbf24',
+            purple: '#c084fc',
+            emerald: '#34d399'
+          }
+        },
+        fontFamily: {
+          sans: ['Inter Variable', 'Noto Sans SC Variable', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+          mono: ['JetBrains Mono Variable', 'Fira Code', 'Cascadia Mono', 'Consolas', 'monospace']
+        }
+      }
+    }
+  }
+</script>
+<style>
+  /* 现代滚动条 */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #090e1a; }
+  ::-webkit-scrollbar-thumb { background: #1f2c4c; border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { background: #2e416e; }
+
+  /* 游戏拟态玻璃卡片 */
+  .game-card {
+    background: radial-gradient(120% 120% at 50% 0%, rgba(20, 30, 52, 0.75) 0%, rgba(9, 14, 26, 0.95) 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(46, 65, 110, 0.5);
+  }
+  .game-card:hover {
+    border-color: rgba(56, 189, 248, 0.45);
+  }
+
+  /* 酷炫滑块样式 - 增大滑轨与滑块以提升可见度与触控感 */
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: 9999px;
+    background: #141e34;
+    outline: none;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  input[type=range]:hover {
+    background: #1f2c4c;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--rng-accent, #38bdf8);
+    border: 2px solid #05070e;
+    box-shadow: 0 0 10px color-mix(in srgb, var(--rng-accent, #38bdf8) 70%, transparent);
+    transition: transform 0.15s, background-color 0.15s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover {
+    transform: scale(1.25);
+    background: color-mix(in srgb, var(--rng-accent, #38bdf8) 72%, white);
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--rng-accent, #38bdf8);
+    border: 2px solid #05070e;
+  }
+
+  /* 画布手势 */
+  #gl {
+    touch-action: none;
+    cursor: grab;
+    display: block;
+    margin: 0 auto;
+  }
+  #gl:active {
+    cursor: grabbing;
+  }
+
+  /* 星星闪烁动画 */
+  @keyframes starGlow {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.6)); }
+    50% { transform: scale(1.15); filter: drop-shadow(0 0 14px rgba(251, 191, 36, 0.95)); }
+  }
+  .star-earned {
+    animation: starGlow 2.4s infinite ease-in-out;
+  }
+
+  /* ===== 深空氛围背景层 (与仿真实验室页统一) ===== */
+  .bg-atmosphere {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(52% 38% at 12% 8%, rgba(56, 189, 248, 0.07), transparent 65%),
+      radial-gradient(46% 34% at 88% 14%, rgba(192, 132, 252, 0.06), transparent 62%),
+      radial-gradient(60% 46% at 50% 108%, rgba(52, 211, 153, 0.05), transparent 70%);
+  }
+  .bg-atmosphere::before {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      radial-gradient(1.2px 1.2px at 8% 22%, rgba(226, 240, 255, 0.75) 45%, transparent 55%),
+      radial-gradient(1px 1px at 27% 68%, rgba(190, 214, 255, 0.55) 45%, transparent 55%),
+      radial-gradient(1.4px 1.4px at 44% 12%, rgba(255, 255, 255, 0.6) 45%, transparent 55%),
+      radial-gradient(1px 1px at 63% 47%, rgba(200, 224, 255, 0.5) 45%, transparent 55%),
+      radial-gradient(1.6px 1.6px at 78% 82%, rgba(236, 246, 255, 0.7) 45%, transparent 55%),
+      radial-gradient(1px 1px at 91% 33%, rgba(210, 232, 255, 0.55) 45%, transparent 55%),
+      radial-gradient(1.1px 1.1px at 15% 88%, rgba(255, 255, 255, 0.45) 45%, transparent 55%),
+      radial-gradient(1.3px 1.3px at 55% 93%, rgba(224, 240, 255, 0.6) 45%, transparent 55%);
+  }
+  .bg-atmosphere::after {
+    content: ""; position: absolute; inset: 0; opacity: 0.5;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  }
+
+  /* ===== 入场动画 (错峰上升) ===== */
+  @keyframes riseIn {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .reveal { opacity: 0; animation: riseIn 0.55s cubic-bezier(0.22, 0.8, 0.32, 1) forwards; }
+  .reveal-1 { animation-delay: 0.05s; } .reveal-2 { animation-delay: 0.14s; }
+  .reveal-3 { animation-delay: 0.23s; } .reveal-4 { animation-delay: 0.32s; }
+  .reveal-5 { animation-delay: 0.41s; }
+
+  /* ===== 卡片浮起微交互 (transform 不影响布局流) ===== */
+  .lift { transition: transform 0.25s cubic-bezier(0.22, 0.8, 0.32, 1), box-shadow 0.25s, border-color 0.25s; }
+  .lift:hover { transform: translateY(-2px); box-shadow: 0 14px 34px -14px rgba(2, 8, 20, 0.85), 0 0 0 1px rgba(56, 189, 248, 0.08); }
+
+  /* ===== 按钮按压反馈 ===== */
+  .btn-press:active { transform: scale(0.97); }
+
+  /* ===== 导航底缘发丝渐变线 ===== */
+  header::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; pointer-events: none;
+    background: linear-gradient(90deg, transparent 4%, rgba(56, 189, 248, 0.5) 30%, rgba(192, 132, 252, 0.4) 62%, transparent 96%);
+  }
+
+  /* ===== 标题自旋轨道徽标 ===== */
+  .logo-ring { position: relative; width: 34px; height: 34px; flex: none; }
+  .logo-ring::before {
+    content: ""; position: absolute; inset: 0; border-radius: 50%;
+    border: 1.5px solid rgba(56, 189, 248, 0.5); border-top-color: rgba(192, 132, 252, 0.9);
+    animation: logoSpin 16s linear infinite;
+  }
+  .logo-ring::after {
+    content: ""; position: absolute; inset: 9px; border-radius: 50%;
+    background: radial-gradient(circle at 32% 30%, #7dd3fc, #38bdf8 45%, #1d4ed8);
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.55);
+  }
+  @keyframes logoSpin { to { transform: rotate(360deg); } }
+
+  /* ===== 画布 HUD 取景框角标 ===== */
+  #canvasContainer::before, #canvasContainer::after {
+    content: ""; position: absolute; width: 18px; height: 18px; z-index: 20; pointer-events: none;
+    border-color: rgba(56, 189, 248, 0.75); border-style: solid; border-width: 0;
+  }
+  #canvasContainer::before { top: 7px; left: 7px; border-top-width: 1.5px; border-left-width: 1.5px; border-top-left-radius: 6px; }
+  #canvasContainer::after { bottom: 7px; right: 7px; border-bottom-width: 1.5px; border-right-width: 1.5px; border-bottom-right-radius: 6px; }
+
+  /* ===== 滑块轨道填充: accent 经容器继承 (容器 style 注入 --rng-accent), 此处不写声明以免覆盖继承值 ===== */
+
+  /* ===== 通关弹窗金色光晕 ===== */
+  #victoryModal .game-card { box-shadow: 0 0 60px -12px rgba(251, 191, 36, 0.35), 0 30px 80px -20px rgba(0, 0, 0, 0.9); }
+</style>
+</head>
+<body class="bg-cyber-950 text-slate-100 min-h-screen selection:bg-cyber-accent selection:text-black flex flex-col font-sans overflow-x-hidden relative text-base">
+
+<!-- 深空氛围背景层 (星云辉光 + 星点 + 噪点, 不参与交互) -->
+<div class="bg-atmosphere" aria-hidden="true"></div>
+
+<!-- 顶部导航栏与关卡星级 HUD -->
+<header class="sticky top-0 z-40 bg-cyber-950/85 backdrop-blur-md border-b border-cyber-700/60 px-4 lg:px-8 py-3.5">
+  <div class="max-w-[1920px] mx-auto flex flex-wrap items-center justify-between gap-4">
+    
+    <!-- 返回实验室与主标题 -->
+    <div class="flex items-center gap-3.5">
+      <a href="strong-lensing.html" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-cyber-850 hover:bg-cyber-800 border border-cyber-700 text-sm text-cyber-accent font-medium transition hover:border-cyber-accent/60 shadow-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        <span>返回仿真实验室</span>
+      </a>
+      <div class="h-6 w-px bg-cyber-700/60 hidden sm:block"></div>
+      <div class="logo-ring" title="Cosmic Lensing Quest"></div>
+      <div class="flex items-center gap-2.5">
+        <h1 class="text-lg sm:text-xl font-bold bg-gradient-to-r from-sky-200 via-indigo-100 to-purple-300 bg-clip-text text-transparent">
+          星系透镜探险小游戏 · Cosmic Lensing Quest
+        </h1>
+        <span class="hidden md:inline-flex px-2.5 py-0.5 text-xs font-semibold rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20">3关挑战</span>
+      </div>
+    </div>
+
+    <!-- 星星收集度成就仪表盘与音效开关 -->
+    <div class="flex items-center gap-3.5">
+      <!-- 三颗星收集进度 -->
+      <div class="flex items-center gap-2.5 bg-cyber-900/90 border border-cyber-700 px-4 py-2 rounded-full shadow-inner">
+        <span class="text-sm text-slate-300 font-medium mr-1 hidden sm:inline">关卡星级:</span>
+        <div class="flex items-center gap-2">
+          <!-- 星星 1 -->
+          <span id="starSlot1" class="transition-all duration-300" title="关卡 1: 宇宙深场">
+            <svg class="w-6 h-6 text-slate-600 fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+          </span>
+          <!-- 星星 2 -->
+          <span id="starSlot2" class="transition-all duration-300" title="关卡 2: 星际风景">
+            <svg class="w-6 h-6 text-slate-600 fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+          </span>
+          <!-- 星星 3 -->
+          <span id="starSlot3" class="transition-all duration-300" title="关卡 3: 引力自拍">
+            <svg class="w-6 h-6 text-slate-600 fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+          </span>
+        </div>
+        <span id="starCounterText" class="text-sm font-mono font-bold text-cyber-gold ml-1">0/3</span>
+      </div>
+
+      <!-- 音效开关 -->
+      <button id="soundToggle" onclick="toggleAudio()" class="p-2.5 rounded-xl bg-cyber-850 hover:bg-cyber-800 border border-cyber-700 text-slate-300 hover:text-white transition" title="开启/静音音效">
+        <svg id="soundIconOn" class="w-5 h-5 text-cyber-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
+        <svg id="soundIconOff" class="w-5 h-5 text-slate-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/></svg>
+      </button>
+
+      <!-- 重置游戏进度 -->
+    <button onclick="resetGameProgress()" class="p-2.5 rounded-xl bg-cyber-850 hover:bg-cyber-800 border border-cyber-700 text-slate-400 hover:text-red-400 transition" title="重置全部星级与任务">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+    </button>
+  </div>
+
+</div>
+</header>
+<main class="max-w-[1920px] mx-auto w-full px-4 lg:px-8 py-4 flex flex-col gap-4 relative z-10">
+
+<!-- 关卡任务选择条卡片 -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+  <!-- 关卡 1: 深空星海 -->
+    <div id="stageCard1" onclick="switchStage(1)" class="game-card lift reveal reveal-1 rounded-2xl p-4 cursor-pointer transition-all duration-200 border-l-4 border-l-sky-400 relative overflow-hidden group">
+      <div class="flex items-start justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-300 flex items-center justify-center font-bold text-base border border-sky-500/30">
+            01
+          </div>
+          <div>
+            <div class="text-xs font-semibold text-sky-400 flex items-center gap-2">
+              <span>第一关 · 宇宙深场</span>
+              <span id="badgeStage1" class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">未通关</span>
+            </div>
+            <h2 class="text-base font-bold text-slate-100 mt-0.5">深空探索 · 极深星系群</h2>
+          </div>
+        </div>
+        <div id="starIcon1" class="text-slate-600 transition-all duration-300">
+          <svg class="w-7 h-7 fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+        </div>
+      </div>
+      <p class="text-xs text-slate-400 mt-2 line-clamp-1">默认哈勃极深场，寻找中央星系拖拽扭曲并导出下载</p>
+    </div>
+
+    <!-- 关卡 2: 星际风景 -->
+    <div id="stageCard2" onclick="switchStage(2)" class="game-card lift reveal reveal-2 rounded-2xl p-4 cursor-pointer transition-all duration-200 border-l-4 border-l-purple-500 opacity-80 hover:opacity-100 relative overflow-hidden group">
+      <div class="flex items-start justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center font-bold text-base border border-purple-500/30">
+            02
+          </div>
+          <div>
+            <div class="text-xs font-semibold text-purple-400 flex items-center gap-2">
+              <span>第二关 · 星际风景</span>
+              <span id="badgeStage2" class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">未通关</span>
+            </div>
+            <h2 class="text-base font-bold text-slate-100 mt-0.5">雪山地平线 · 空间虫洞</h2>
+          </div>
+        </div>
+        <div id="starIcon2" class="text-slate-600 transition-all duration-300">
+          <svg class="w-7 h-7 fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+        </div>
+      </div>
+      <p class="text-xs text-slate-400 mt-2 line-clamp-1">默认雪山风光，拖拽透镜制造折叠弯曲的地表地平线并导出</p>
+    </div>
+
+    <!-- 关卡 3: 引力自拍火柴人 -->
+    <div id="stageCard3" onclick="switchStage(3)" class="game-card lift reveal reveal-3 rounded-2xl p-4 cursor-pointer transition-all duration-200 border-l-4 border-l-amber-500 opacity-80 hover:opacity-100 relative overflow-hidden group">
+      <div class="flex items-start justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center font-bold text-base border border-amber-500/30">
+            03
+          </div>
+          <div>
+            <div class="text-xs font-semibold text-amber-400 flex items-center gap-2">
+              <span>第三关 · 引力自拍</span>
+              <span id="badgeStage3" class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">未通关</span>
+            </div>
+            <h2 class="text-base font-bold text-slate-100 mt-0.5">火柴人自拍 · 哈哈镜外星人</h2>
+          </div>
+        </div>
+        <div id="starIcon3" class="text-slate-600 transition-all duration-300">
+          <svg class="w-7 h-7 fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+        </div>
+      </div>
+      <p class="text-xs text-slate-400 mt-2 line-clamp-1">默认魔性大头火柴人，把透镜拖至面部制造外星人大头特效并导出</p>
+  </div>
+</section>
+
+<!-- 核心交互视口与侧边魔杖参数控制台 - 采用网格统一对齐 -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+
+  <!-- 左侧/中央：自适应各向同性 WebGL 引力透镜视口 (占比 8/12 或 9/12) -->
+  <div id="leftCard" class="lg:col-span-8 xl:col-span-9 flex flex-col justify-between game-card lift reveal reveal-2 rounded-3xl p-3.5 sm:p-4 shadow-2xl relative">
+    
+    <!-- 动态贴合布局区：紧致包裹画布，杜绝无谓的巨大上下空黑区 -->
+  <div class="flex items-center justify-center w-full py-1">
+    <div id="canvasContainer" class="relative rounded-2xl overflow-hidden border border-cyber-700/80 shadow-2xl bg-black">
+      <canvas id="gl" class="block"></canvas>
+
+      <!-- 画布初始操作提示浮层 (用户拖拽后自动隐藏) -->
+        <div id="dragPromptBadge" class="absolute inset-0 pointer-events-none flex items-center justify-center bg-black/40 backdrop-blur-[2px] transition-opacity duration-300 rounded-2xl">
+          <div class="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-cyber-900/95 border border-cyber-accent/60 text-sm text-cyber-accent font-medium shadow-2xl animate-pulse">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg>
+            <span>用鼠标按住并拖动以制造引力透镜效果</span>
+          </div>
+        </div>
+
+        <!-- 当前帧率 HUD -->
+        <div id="fpsBadge" class="absolute bottom-2.5 left-2.5 text-xs font-mono px-2.5 py-1 rounded-lg bg-black/70 text-slate-300 border border-cyber-700/60 pointer-events-none">
+          60 FPS
+        </div>
+      </div>
+    </div>
+
+    <!-- 快速图片操作栏 - 按钮在左，当前底图标签靠右且不遮挡按钮 -->
+    <div class="w-full flex items-center justify-between gap-4 mt-3 pt-2.5 border-t border-cyber-700/60 text-sm">
+      <!-- 左侧：自定义上传按钮 -->
+      <div class="flex items-center gap-2 shrink-0">
+        <button onclick="document.getElementById('fileUploadInput').click()" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-cyber-800 hover:bg-cyber-700 border border-cyber-600 text-slate-100 transition font-medium text-xs sm:text-sm shadow">
+          <svg class="w-4 h-4 text-cyber-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+          <span>上传自定义图片</span>
+        </button>
+        <input type="file" id="fileUploadInput" accept="image/*" class="hidden">
+      </div>
+
+      <!-- 右侧：当前底图标签，右对齐，保证与左侧按钮互不挤压 -->
+      <div class="flex items-center gap-2 min-w-0 text-right justify-end">
+        <span class="w-2 h-2 rounded-full bg-cyber-accent shrink-0 hidden sm:inline-block"></span>
+        <span id="currentImgLabel" class="text-xs sm:text-sm text-slate-300 font-medium truncate max-w-[260px] sm:max-w-md" title="当前底图">
+          当前底图: 哈勃极深场 2014 (Hubble Ultra Deep Field 官方原图)
+        </span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 右侧：透镜魔杖物理参数与通关导出面板 (占比 4/12 或 3/12) -->
+  <div id="rightCol" class="lg:col-span-4 xl:col-span-3 flex flex-col justify-between gap-3 w-full reveal reveal-3">
+
+    <!-- 物理滑块面板 - 内部均匀舒展铺满，紧凑优雅 -->
+    <div class="game-card rounded-3xl p-4 flex-1 flex flex-col justify-between border border-cyber-700/80 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-cyber-700/60 pb-2">
+        <h3 class="text-xs sm:text-sm font-bold text-cyber-accent uppercase tracking-wider flex items-center gap-2">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+          <span>透镜物理魔杖</span>
+        </h3>
+        <span class="text-[11px] text-slate-400 font-mono">SIE 椭球透镜</span>
+      </div>
+
+      <!-- 参数组 - 分散铺满容器，具有舒适呼吸感 -->
+      <div class="flex-1 flex flex-col justify-between py-3 gap-3">
+        <!-- 爱因斯坦半径 θE -->
+        <div class="flex flex-col gap-1.5 p-2.5 sm:p-3 rounded-xl bg-cyber-900/60 border border-cyber-700/50 hover:border-cyber-accent/40 transition" style="--rng-accent:#38bdf8">
+          <div class="flex justify-between items-center text-slate-200 text-xs sm:text-sm font-medium">
+            <label class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-cyber-accent"></span>
+              <span>爱因斯坦半径 (θ<sub>E</sub>)</span>
+            </label>
+            <output id="thetaE_val" class="font-mono text-cyber-accent font-bold text-sm sm:text-base">55 px</output>
+          </div>
+          <input type="range" id="thetaE_slider" min="15" max="150" step="1" value="55" class="my-0.5">
+          <div class="flex justify-between text-[10px] sm:text-[11px] text-slate-400 font-mono">
+            <span>弱折射 (15 px)</span>
+            <span>巨大扭曲环 (150 px)</span>
+          </div>
+        </div>
+
+        <!-- 椭率/轴比 q -->
+        <div class="flex flex-col gap-1.5 p-2.5 sm:p-3 rounded-xl bg-cyber-900/60 border border-cyber-700/50 hover:border-purple-400/40 transition" style="--rng-accent:#c084fc">
+          <div class="flex justify-between items-center text-slate-200 text-xs sm:text-sm font-medium">
+            <label class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+              <span>透镜质量轴比 (q)</span>
+            </label>
+            <output id="ell_val" class="font-mono text-purple-300 font-bold text-sm sm:text-base">0.72</output>
+          </div>
+          <input type="range" id="ell_slider" min="0.15" max="1.0" step="0.01" value="0.72" class="my-0.5">
+          <div class="flex justify-between text-[10px] sm:text-[11px] text-slate-400 font-mono">
+            <span>扁长椭球 (0.15)</span>
+            <span>正圆对称 (1.00)</span>
+          </div>
+        </div>
+
+        <!-- 方向角 angle -->
+        <div class="flex flex-col gap-1.5 p-2.5 sm:p-3 rounded-xl bg-cyber-900/60 border border-cyber-700/50 hover:border-pink-400/40 transition" style="--rng-accent:#f472b6">
+          <div class="flex justify-between items-center text-slate-200 text-xs sm:text-sm font-medium">
+            <label class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-pink-400"></span>
+              <span>透镜取向方位角 (PA)</span>
+            </label>
+            <output id="angle_val" class="font-mono text-pink-300 font-bold text-sm sm:text-base">35°</output>
+          </div>
+          <input type="range" id="angle_slider" min="0" max="180" step="1" value="35" class="my-0.5">
+          <div class="flex justify-between text-[10px] sm:text-[11px] text-slate-400 font-mono">
+            <span>水平基准 (0°)</span>
+            <span>半周旋转 (180°)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 快捷透镜形态与重置 -->
+      <div class="flex flex-col gap-2 pt-2 border-t border-cyber-700/60 shrink-0">
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="setLensPreset(40, 0.99, 0)" class="py-1.5 px-2.5 rounded-xl bg-cyber-800 hover:bg-cyber-700 border border-cyber-700 text-slate-200 transition text-xs font-medium">对称圆环</button>
+          <button onclick="setLensPreset(85, 0.45, 45)" class="py-1.5 px-2.5 rounded-xl bg-cyber-800 hover:bg-cyber-700 border border-cyber-700 text-slate-200 transition text-xs font-medium">拉伸长弧</button>
+        </div>
+        <button onclick="resetLensToFlat()" class="w-full py-1.5 px-2.5 rounded-xl bg-cyber-900 hover:bg-cyber-800 border border-cyber-700/70 text-slate-300 hover:text-slate-100 transition text-xs font-medium flex items-center justify-center gap-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          <span>重置为无透镜原图</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 核心通关动作：导出与摘星卡片 -->
+    <div class="game-card rounded-3xl p-3.5 sm:p-4 flex flex-col gap-2 border border-cyber-700/80 shadow-2xl bg-gradient-to-b from-cyber-900/95 to-cyber-950 shrink-0">
+      <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-cyber-gold">
+        <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+        <span id="exportMissionTitle">通关目标: 导出透镜作品</span>
+      </div>
+      <p id="exportMissionDesc" class="text-xs text-slate-300 leading-relaxed line-clamp-2">
+        在画布上拖拽出引力透镜扭曲，点击下方按钮导出作品并点亮本关星星！
+      </p>
+
+      <!-- 导出并通关按钮 -->
+      <button id="exportBtn" onclick="exportLensedImageAndEarnStar()" class="w-full py-2.5 sm:py-3 px-4 rounded-xl bg-gradient-to-r from-sky-500 via-indigo-600 to-purple-600 hover:from-sky-400 hover:to-purple-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-indigo-500/30 transition-all flex items-center justify-center gap-2 group active:scale-95">
+        <svg class="w-4 h-4 text-cyber-gold group-hover:rotate-12 transition-transform" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+        <span id="exportBtnText">导出透镜作品 · 获得星星 ⭐</span>
+      </button>
+    </div>
+
+  </div>
+
+</section>
+
+</main>
+<!-- 全通关礼花与成就弹窗 -->
+<div id="victoryModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+  <div class="game-card rounded-3xl p-6 sm:p-8 max-w-md w-full border border-cyber-gold/60 shadow-2xl text-center flex flex-col items-center gap-4 relative animate-in fade-in zoom-in duration-300">
+    <div class="w-16 h-16 rounded-full bg-cyber-gold/20 border-2 border-cyber-gold flex items-center justify-center text-3xl shadow-lg shadow-cyber-gold/40 star-earned">
+      🏆
+    </div>
+    <h3 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-400">
+      宇宙引力大师 · 全通关认证！
+    </h3>
+    <p class="text-xs text-slate-300 leading-relaxed">
+      太棒了！您已成功征服全部 3 个关卡，分别掌握了宇宙深场环化、星际山川虫洞以及魔性火柴人大头变形！
+    </p>
+    <div class="flex items-center justify-center gap-2 text-2xl my-1">
+      <span class="text-cyber-gold">⭐</span>
+      <span class="text-cyber-gold">⭐</span>
+      <span class="text-cyber-gold">⭐</span>
+    </div>
+    <div class="flex items-center gap-3 w-full mt-2">
+      <button onclick="document.getElementById('victoryModal').classList.add('hidden')" class="flex-1 py-2 px-4 rounded-xl bg-cyber-800 hover:bg-cyber-700 text-slate-200 text-xs font-semibold border border-cyber-700 transition">
+        继续畅玩自由模式
+      </button>
+      <a href="strong-lensing.html" class="flex-1 py-2 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-semibold shadow-md shadow-blue-500/30 text-center">
+        深入物理实验室
+      </a>
+    </div>
+  </div>
+</div>
+<script>
+"use strict";
+
+/* =====================================================================
+ * WebGL 核心初始化与着色器设置
+ * ===================================================================== */
+const canvas = document.getElementById('gl');
+const gl = canvas.getContext('webgl', {
+  antialias: true,
+  preserveDrawingBuffer: true, // 关键：允许下载导出高质 WebGL 画面
+  powerPreference: 'high-performance'
+});
+
+if (!gl) {
+  document.body.innerHTML = '<div class="p-8 text-center text-red-400">您的浏览器不支持 WebGL，请开启硬件加速或使用现代浏览器。</div>';
+  throw new Error('WebGL not supported');
+}
+
+// 顶点着色器：标准全屏四边形
+const VS_SRC = `
+attribute vec2 a_pos;
+varying vec2 v_uv;
+void main() {
+  v_uv = a_pos * 0.5 + 0.5;
+  gl_Position = vec4(a_pos, 0.0, 1.0);
+}
+`;
+
+// 片元着色器：奇异等温椭球 (SIE) 偏折场与无缝无畸变采样
+const FS_SRC = `
+precision highp float;
+uniform sampler2D u_tex;
+uniform vec2 u_res;         // 画布分辨率 (width, height)
+uniform vec2 u_center;      // 透镜中心点坐标 (基于 WebGL 坐标系)
+uniform float u_thetaE;     // 爱因斯坦半径
+uniform float u_q;          // 轴比 q
+uniform float u_angle;      // 方位角 (弧度)
+uniform float u_strength;   // 透镜强度插值系数 (0.0=无透镜原图, 1.0=完整透镜化)
+varying vec2 v_uv;
+
+vec2 rot(vec2 p, float a) {
+  float c = cos(a), s = sin(a);
+  return vec2(c * p.x - s * p.y, s * p.x + c * p.y);
+}
+
+// 连续三角波镜像 UV 映射，消除任意边界黑边
+vec2 mirrorUV(vec2 p) {
+  vec2 m = abs(mod(p - 1.0, 2.0) - 1.0);
+  return clamp(m, 0.001, 0.999);
+}
+
+void main() {
+  vec2 theta = v_uv * u_res - u_center;
+  vec2 tp = rot(theta, -u_angle);
+
+  float q = clamp(u_q, 0.15, 0.999);
+  float e2 = 1.0 - q * q;
+  float e = sqrt(e2);
+  float sq = sqrt(q);
+
+  float rq = max(sqrt(q * q * tp.x * tp.x + tp.y * tp.y), 1e-4);
+  float ax = (u_thetaE * sq / e) * atan(e * tp.x / rq);
+  float t = clamp(e * tp.y / rq, -0.999999, 0.999999);
+  float ay = (u_thetaE * sq / e) * 0.5 * log((1.0 + t) / (1.0 - t));
+
+  vec2 alpha = rot(vec2(ax, ay), u_angle);
+
+  // 平滑高斯截断，使远场背景自然衔接
+  float rc = 2.8 * u_thetaE;
+  alpha *= exp(-rq * rq / (2.0 * rc * rc));
+
+  // 透镜映射方程
+  vec2 beta = theta - alpha * u_strength;
+  vec2 uv = (u_center + beta) / u_res;
+
+  // 采样纹理
+  vec3 col = texture2D(u_tex, mirrorUV(uv)).rgb;
+
+  // 当透镜激活时，叠加轻微爱因斯坦环光辉
+  float ring = smoothstep(2.5, 0.0, length(beta)) * u_strength;
+  col += vec3(0.22, 0.55, 1.0) * ring * 0.18;
+
+  gl_FragColor = vec4(col, 1.0);
+}
+`;
+
+function createShader(gl, type, source) {
+  const s = gl.createShader(type);
+  gl.shaderSource(s, source);
+  gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+    console.error(gl.getShaderInfoLog(s));
+    gl.deleteShader(s);
+    return null;
+  }
+  return s;
+}
+
+const vs = createShader(gl, gl.VERTEX_SHADER, VS_SRC);
+const fs = createShader(gl, gl.FRAGMENT_SHADER, FS_SRC);
+const program = gl.createProgram();
+gl.attachShader(program, vs);
+gl.attachShader(program, fs);
+gl.linkProgram(program);
+gl.useProgram(program);
+
+// 全屏四边形顶点数据
+const posBuf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, posBuf);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+  -1, -1,
+   1, -1,
+  -1,  1,
+   1,  1
+]), gl.STATIC_DRAW);
+
+const aPosLoc = gl.getAttribLocation(program, 'a_pos');
+gl.enableVertexAttribArray(aPosLoc);
+gl.vertexAttribPointer(aPosLoc, 2, gl.FLOAT, false, 0, 0);
+
+// Uniform 映射
+const U = {
+  u_tex: gl.getUniformLocation(program, 'u_tex'),
+  u_res: gl.getUniformLocation(program, 'u_res'),
+  u_center: gl.getUniformLocation(program, 'u_center'),
+  u_thetaE: gl.getUniformLocation(program, 'u_thetaE'),
+  u_q: gl.getUniformLocation(program, 'u_q'),
+  u_angle: gl.getUniformLocation(program, 'u_angle'),
+  u_strength: gl.getUniformLocation(program, 'u_strength')
+};
+
+const tex = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, tex);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+/* =====================================================================
+ * 内置高画质离线底图生成器 (确保任何环境零网络依赖、不报错)
+ * ===================================================================== */
+let curImgW = 1024, curImgH = 1024;
+
+// 第 1 关：深空星系与哈勃极深场 (HUDF 2014) 逼真生成器 (16:9 比例与特征星系精确匹配)
+function generateHubbleSpaceCanvas() {
+  const c = document.createElement('canvas');
+  c.width = 1600; c.height = 900;
+  const ctx = c.getContext('2d');
+  // 漆黑深邃宇宙背景底色
+  ctx.fillStyle = '#020307';
+  ctx.fillRect(0, 0, c.width, c.height);
+
+  // 宇宙深空极微弱弥散紫外与红外背景辉光
+  for (let i = 0; i < 22; i++) {
+    const rx = Math.random() * c.width, ry = Math.random() * c.height, rad = 100 + Math.random() * 260;
+    const hue = [215, 270, 185, 30, 45][i % 5];
+    const g = ctx.createRadialGradient(rx, ry, 0, rx, ry, rad);
+    g.addColorStop(0, `hsla(${hue}, 80%, 50%, 0.08)`);
+    g.addColorStop(1, 'hsla(0,0%,0%,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(rx, ry, rad, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // 极深场椭圆星系与旋涡星系群 (金色、橙红、蓝白核心)
+  for (let i = 0; i < 340; i++) {
+    const gx = Math.random() * c.width, gy = Math.random() * c.height;
+    const gsize = 2.5 + Math.random() * 16;
+    const gq = 0.25 + Math.random() * 0.75;
+    const gang = Math.random() * Math.PI;
+    // 依哈勃极深场实测红移颜色分布：多数为暖金红褐色古老星系与部分致密年轻蓝星系
+    const ghue = Math.random() < 0.68 ? (30 + Math.random() * 28) : (195 + Math.random() * 45);
+
+    ctx.save();
+    ctx.translate(gx, gy);
+    ctx.rotate(gang);
+    const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, gsize);
+    grad.addColorStop(0, `hsla(${ghue}, 90%, 88%, 0.95)`);
+    grad.addColorStop(0.35, `hsla(${ghue}, 75%, 60%, 0.45)`);
+    grad.addColorStop(1, 'hsla(0,0%,0%,0)');
+    ctx.fillStyle = grad;
+    ctx.scale(1, gq);
+    ctx.beginPath(); ctx.arc(0, 0, gsize, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+
+  // 特征明亮恒星 (带哈勃标志性四角十字衍射十字芒线)
+  const brightStars = [
+    { x: 0.17 * c.width, y: 0.40 * c.height, r: 4.2, col: '#fde047', len: 32 },
+    { x: 0.22 * c.width, y: 0.42 * c.height, r: 4.8, col: '#fbbf24', len: 36 },
+    { x: 0.76 * c.width, y: 0.41 * c.height, r: 4.5, col: '#f59e0b', len: 34 },
+    { x: 0.77 * c.width, y: 0.50 * c.height, r: 5.2, col: '#fef08a', len: 42 },
+    { x: 0.69 * c.width, y: 0.79 * c.height, r: 4.0, col: '#f97316', len: 30 },
+    { x: 0.85 * c.width, y: 0.18 * c.height, r: 3.8, col: '#93c5fd', len: 26 },
+    { x: 0.55 * c.width, y: 0.80 * c.height, r: 4.0, col: '#e2e8f0', len: 28 },
+    { x: 0.70 * c.width, y: 0.96 * c.height, r: 3.6, col: '#38bdf8', len: 24 }
+  ];
+
+  for (const s of brightStars) {
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill();
+
+    // 衍射星芒
+    ctx.strokeStyle = s.col;
+    ctx.lineWidth = 1.3;
+    ctx.beginPath();
+    ctx.moveTo(s.x - s.len, s.y); ctx.lineTo(s.x + s.len, s.y);
+    ctx.moveTo(s.x, s.y - s.len); ctx.lineTo(s.x, s.y + s.len);
+    ctx.stroke();
+
+    // 45 度微光晕
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+    ctx.lineWidth = 0.8;
+    const diag = s.len * 0.45;
+    ctx.beginPath();
+    ctx.moveTo(s.x - diag, s.y - diag); ctx.lineTo(s.x + diag, s.y + diag);
+    ctx.moveTo(s.x - diag, s.y + diag); ctx.lineTo(s.x + diag, s.y - diag);
+    ctx.stroke();
+  }
+
+  // 背景浩瀚高红移微小星系点阵与恒星微粒
+  for (let i = 0; i < 2800; i++) {
+    const px = Math.random() * c.width, py = Math.random() * c.height;
+    const pSize = Math.random() * 1.4;
+    const pCol = Math.random() < 0.65 ? 'rgba(254, 240, 138,' : (Math.random() < 0.85 ? 'rgba(186, 230, 253,' : 'rgba(248, 113, 113,');
+    ctx.fillStyle = `${pCol} ${0.25 + Math.random() * 0.75})`;
+    ctx.fillRect(px, py, pSize, pSize);
+  }
+
+  return c;
+}
+
+// 第 2 关：雪山星际风景画生成器
+function generateLandscapeCanvas() {
+  const c = document.createElement('canvas');
+  c.width = 1600; c.height = 1000;
+  const ctx = c.getContext('2d');
+
+  // 日落黄昏暮光天际线
+  const skyGrad = ctx.createLinearGradient(0, 0, 0, c.height * 0.7);
+  skyGrad.addColorStop(0, '#0f172a');
+  skyGrad.addColorStop(0.3, '#1e1b4b');
+  skyGrad.addColorStop(0.65, '#431407');
+  skyGrad.addColorStop(0.85, '#9a3412');
+  skyGrad.addColorStop(1, '#ea580c');
+  ctx.fillStyle = skyGrad;
+  ctx.fillRect(0, 0, c.width, c.height);
+
+  // 远山剪影与雪顶峰峦
+  ctx.fillStyle = '#1c1917';
+  ctx.beginPath();
+  ctx.moveTo(0, c.height * 0.65);
+  const peaks = [
+    [0.15, 0.38], [0.32, 0.28], [0.5, 0.45], [0.68, 0.32], [0.85, 0.42], [1.0, 0.62]
+  ];
+  let curX = 0;
+  for (const [pxRel, pyRel] of peaks) {
+    const px = pxRel * c.width;
+    const py = pyRel * c.height;
+    ctx.lineTo((curX + px) / 2, py - 40);
+    ctx.lineTo(px, py);
+    curX = px;
+  }
+  ctx.lineTo(c.width, c.height);
+  ctx.lineTo(0, c.height);
+  ctx.closePath();
+  ctx.fill();
+
+  // 雪峰高光
+  ctx.fillStyle = 'rgba(254, 243, 199, 0.4)';
+  ctx.beginPath();
+  ctx.moveTo(c.width * 0.28, c.height * 0.38);
+  ctx.lineTo(c.width * 0.32, c.height * 0.28);
+  ctx.lineTo(c.width * 0.36, c.height * 0.42);
+  ctx.closePath();
+  ctx.fill();
+
+  // 湖泊水面镜面倒影
+  const lakeGrad = ctx.createLinearGradient(0, c.height * 0.65, 0, c.height);
+  lakeGrad.addColorStop(0, '#0c0a09');
+  lakeGrad.addColorStop(0.4, '#1c1917');
+  lakeGrad.addColorStop(1, '#020617');
+  ctx.fillStyle = lakeGrad;
+  ctx.fillRect(0, c.height * 0.65, c.width, c.height * 0.35);
+
+  return c;
+}
+
+// 第 3 关：萌态魔性火柴人大头人像生成器
+function generateStickmanCanvas() {
+  const c = document.createElement('canvas');
+  c.width = 1000; c.height = 1000;
+  const ctx = c.getContext('2d');
+
+  // 明快时尚波普渐变背景
+  const bg = ctx.createRadialGradient(500, 500, 100, 500, 500, 700);
+  bg.addColorStop(0, '#1e293b');
+  bg.addColorStop(1, '#090d16');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, 1000, 1000);
+
+  // 几何网格光标线
+  ctx.strokeStyle = 'rgba(56, 189, 248, 0.12)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < 1000; x += 50) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 1000); ctx.stroke();
+  }
+  for (let y = 0; y < 1000; y += 50) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(1000, y); ctx.stroke();
+  }
+
+  // 火柴人头部
+  const hx = 500, hy = 340, headR = 170;
+
+  // 身体线条
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 14;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  // 躯干
+  ctx.beginPath();
+  ctx.moveTo(hx, hy + headR);
+  ctx.lineTo(hx, 740);
+  ctx.stroke();
+
+  // 双臂 (左手叉腰，右手热情挥手打招呼)
+  ctx.beginPath();
+  ctx.moveTo(hx, 560);
+  ctx.lineTo(350, 620);
+  ctx.lineTo(320, 550);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(hx, 560);
+  ctx.lineTo(670, 510);
+  ctx.lineTo(740, 410);
+  ctx.stroke();
+
+  // 双腿
+  ctx.beginPath();
+  ctx.moveTo(hx, 740);
+  ctx.lineTo(380, 930);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(hx, 740);
+  ctx.lineTo(620, 930);
+  ctx.stroke();
+
+  // 头颅 (亮白圆环 + 极客微发光)
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.arc(hx, hy, headR, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 眼睛与呆萌表情
+  ctx.fillStyle = '#090d16';
+  // 左眼
+  ctx.beginPath(); ctx.arc(hx - 58, hy - 25, 26, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath(); ctx.arc(hx - 66, hy - 32, 9, 0, Math.PI * 2); ctx.fill();
+
+  // 右眼
+  ctx.fillStyle = '#090d16';
+  ctx.beginPath(); ctx.arc(hx + 58, hy - 25, 26, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath(); ctx.arc(hx + 50, hy - 32, 9, 0, Math.PI * 2); ctx.fill();
+
+  // 开心微笑
+  ctx.strokeStyle = '#090d16';
+  ctx.lineWidth = 10;
+  ctx.beginPath();
+  ctx.arc(hx, hy + 45, 55, 0.15 * Math.PI, 0.85 * Math.PI);
+  ctx.stroke();
+
+  // 红领结
+  ctx.fillStyle = '#ef4444';
+  ctx.beginPath();
+  ctx.moveTo(hx, hy + headR);
+  ctx.lineTo(hx - 36, hy + headR + 25);
+  ctx.lineTo(hx - 36, hy + headR - 25);
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(hx, hy + headR);
+  ctx.lineTo(hx + 36, hy + headR + 25);
+  ctx.lineTo(hx + 36, hy + headR - 25);
+  ctx.closePath();
+  ctx.fill();
+
+  // 逗趣提示文字
+  ctx.fillStyle = '#38bdf8';
+  ctx.font = 'bold 36px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('用引力透镜拖我大头！👀', 500, 110);
+
+  return c;
+}
+/* =====================================================================
+ * 各向同性画幅自适应计算系统 (紧密包裹画布，消灭多余留黑边框)
+ * ===================================================================== */
+function updateCanvasSize() {
+  const container = document.getElementById('canvasContainer');
+  const leftCard = document.getElementById('leftCard');
+  if (!container || !leftCard) return;
+
+  // 标定舒适适中的画布高度：略微调高至 530px ~ 600px，视口更舒展，不显窄瘪
+  const availMaxH = Math.max(380, Math.min(600, Math.round(window.innerHeight * 0.62)));
+  const availMaxW = Math.max(300, leftCard.clientWidth - 32);
+
+  const imgAspect = curImgW / curImgH;
+  let targetW, targetH;
+
+  if (availMaxW / availMaxH > imgAspect) {
+    // 高度占满可用高度，宽度按原图比例自适应
+    targetH = availMaxH;
+    targetW = targetH * imgAspect;
+  } else {
+    // 宽度占满可用宽度，高度按原图比例自适应
+    targetW = availMaxW;
+    targetH = targetW / imgAspect;
+  }
+
+  targetW = Math.max(260, Math.round(targetW));
+  targetH = Math.max(260, Math.round(targetH));
+
+  canvas.style.width = `${targetW}px`;
+  canvas.style.height = `${targetH}px`;
+
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = Math.round(targetW * dpr);
+  canvas.height = Math.round(targetH * dpr);
+  gl.viewport(0, 0, canvas.width, canvas.height);
+}
+
+function uploadImageToGL(source) {
+  curImgW = source.naturalWidth || source.width || 1024;
+  curImgH = source.naturalHeight || source.height || 1024;
+
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+
+  updateCanvasSize();
+
+  // 初始透镜状态：中心对准正中，强度归零 (完全无透镜扭曲，保持原样)
+  lens.cx = lens.tx = canvas.width / 2;
+  lens.cy = lens.ty = canvas.height / 2;
+  lens.strength = 0.0;
+  lens.target = 0.0;
+  lens.hasInteracted = false;
+
+  const promptBadge = document.getElementById('dragPromptBadge');
+  if (promptBadge) promptBadge.classList.remove('hidden');
+}
+
+window.addEventListener('resize', () => {
+  if (tex) updateCanvasSize();
+});
+/* =====================================================================
+ * 透镜参数、光标指针捕获与 Web Audio 合成音效
+ * ===================================================================== */
+const P = {
+  thetaE: 55,
+  q: 0.72,
+  angleDeg: 35
+};
+
+const lens = {
+  cx: 500,
+  cy: 500,
+  tx: 500,
+  ty: 500,
+  strength: 0.0,
+  target: 0.0,
+  active: false,
+  hasInteracted: false
+};
+
+// 绑定滑动条
+const thetaESlider = document.getElementById('thetaE_slider');
+const ellSlider = document.getElementById('ell_slider');
+const angleSlider = document.getElementById('angle_slider');
+
+/* 滑块轨道填充: 按当前值百分比着色 (与仿真实验室 paintRange 统一) */
+function paintRange(el) {
+  const min = parseFloat(el.min), max = parseFloat(el.max), v = parseFloat(el.value);
+  if (!isFinite(min) || !isFinite(max) || max === min) return;
+  const pct = Math.max(0, Math.min(100, (v - min) / (max - min) * 100)).toFixed(2);
+  const acc = getComputedStyle(el).getPropertyValue("--rng-accent").trim() || "#38bdf8";
+  el.style.background = `linear-gradient(90deg, ${acc} 0%, ${acc} ${pct}%, #141e34 ${pct}%, #141e34 100%)`;
+}
+function paintAllRanges() {
+  [thetaESlider, ellSlider, angleSlider].forEach(paintRange);
+}
+paintAllRanges();
+
+thetaESlider.addEventListener('input', (e) => {
+  P.thetaE = parseFloat(e.target.value);
+  document.getElementById('thetaE_val').textContent = `${P.thetaE} px`;
+  paintRange(e.target);
+});
+
+ellSlider.addEventListener('input', (e) => {
+  P.q = parseFloat(e.target.value);
+  document.getElementById('ell_val').textContent = P.q.toFixed(2);
+  paintRange(e.target);
+});
+
+angleSlider.addEventListener('input', (e) => {
+  P.angleDeg = parseFloat(e.target.value);
+  document.getElementById('angle_val').textContent = `${P.angleDeg}°`;
+  paintRange(e.target);
+});
+
+function setLensPreset(tE, q, ang) {
+  P.thetaE = tE; P.q = q; P.angleDeg = ang;
+  thetaESlider.value = tE;
+  ellSlider.value = q;
+  angleSlider.value = ang;
+  document.getElementById('thetaE_val').textContent = `${tE} px`;
+  document.getElementById('ell_val').textContent = q.toFixed(2);
+  document.getElementById('angle_val').textContent = `${ang}°`;
+  paintAllRanges();
+  if (lens.hasInteracted) {
+    lens.target = 1.0;
+  }
+  playSynthSound('click');
+}
+
+function resetLensToFlat() {
+  lens.active = false;
+  lens.target = 0.0;
+  lens.hasInteracted = false;
+  const promptBadge = document.getElementById('dragPromptBadge');
+  if (promptBadge) promptBadge.classList.remove('hidden');
+  playSynthSound('click');
+}
+
+// 严密精准的光标坐标归一化转换 (支持触摸及任意 DPI 屏幕)
+function toLocalCanvasCoord(ev) {
+  const rect = canvas.getBoundingClientRect();
+  const nx = Math.max(0, Math.min(1, (ev.clientX - rect.left) / rect.width));
+  const ny = Math.max(0, Math.min(1, (ev.clientY - rect.top) / rect.height));
+  // WebGL 垂直方向向上为正
+  const px = nx * canvas.width;
+  const py = (1.0 - ny) * canvas.height;
+  return [px, py];
+}
+
+let lastLensingSoundTime = 0;
+
+canvas.addEventListener('pointerdown', (e) => {
+  lens.active = true;
+  lens.target = 1.0;
+  lens.hasInteracted = true;
+  const [px, py] = toLocalCanvasCoord(e);
+  lens.tx = px; lens.ty = py;
+  canvas.setPointerCapture(e.pointerId);
+
+  playSynthSound('lensing');
+  const promptBadge = document.getElementById('dragPromptBadge');
+  if (promptBadge) promptBadge.classList.add('hidden');
+});
+
+canvas.addEventListener('pointermove', (e) => {
+  if (lens.active) {
+    const [px, py] = toLocalCanvasCoord(e);
+    lens.tx = px; lens.ty = py;
+
+    const now = Date.now();
+    if (now - lastLensingSoundTime > 260) {
+      playSynthSound('lensing');
+      lastLensingSoundTime = now;
+    }
+  }
+});
+
+function onRelease() {
+  lens.active = false;
+  // 关键用户需求：松开鼠标后永久保持最后离开时的透镜效果 (不淡出)，以便静止检查与导出下载！
+  if (lens.hasInteracted) {
+    lens.target = 1.0;
+  }
+}
+
+canvas.addEventListener('pointerup', onRelease);
+canvas.addEventListener('pointercancel', onRelease);
+canvas.addEventListener('pointerleave', onRelease);
+
+// Web Audio 合成音效引擎 (无外部音频 URL 依赖)
+let audioCtx = null;
+let isAudioMuted = false;
+
+function getAudioContext() {
+  if (!audioCtx) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) audioCtx = new AudioContextClass();
+  }
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+  return audioCtx;
+}
+
+function playSynthSound(type) {
+  if (isAudioMuted) return;
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+
+    if (type === 'lensing') {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(180, now);
+      osc.frequency.exponentialRampToValueAtTime(320, now + 0.12);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.12);
+    } else if (type === 'star') {
+      const notes = [523.25, 659.25, 783.99, 1046.5];
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.12, now + i * 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.35);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + i * 0.08);
+        osc.stop(now + i * 0.08 + 0.35);
+      });
+    } else if (type === 'click') {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(600, now);
+      gain.gain.setValueAtTime(0.06, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.05);
+    }
+  } catch (err) {
+    // 忽略静音限制
+  }
+}
+
+function toggleAudio() {
+  isAudioMuted = !isAudioMuted;
+  document.getElementById('soundIconOn').classList.toggle('hidden', isAudioMuted);
+  document.getElementById('soundIconOff').classList.toggle('hidden', !isAudioMuted);
+}
+/* =====================================================================
+ * 关卡管理、用户上传与星级收集业务逻辑
+ * ===================================================================== */
+let currentStage = 1;
+const completedStages = new Set();
+
+const STAGE_CONFIG = {
+  1: {
+    name: '第一关 · 深空星海',
+    label: '当前底图: 哈勃极深场 2014 (Hubble Ultra Deep Field 官方原图)',
+    generator: generateHubbleSpaceCanvas,
+    onlineUrls: [
+      // 1. 本地同级目录优先载入
+      'hudf.jpg',
+      // 2. ESA/Hubble 官方原版全景高可用 CDN 镜像 (heic0611b)
+      'https://cdn.esahubble.org/archives/images/large/heic0611b.jpg',
+      // 3. 维基百科/NASA STScI 官方 2014 版
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/NASA-HS201427a-HubbleUltraDeepField2014-20140603.jpg/1280px-NASA-HS201427a-HubbleUltraDeepField2014-20140603.jpg'
+    ],
+    presetTE: 55,
+    presetQ: 0.72,
+    presetAng: 35
+  },
+  2: {
+    name: '第二关 · 星际风景',
+    label: '当前底图: 雪山与湖泊自然风景',
+    generator: generateLandscapeCanvas,
+    onlineUrls: [
+      'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1600&q=80'
+    ],
+    presetTE: 65,
+    presetQ: 0.6,
+    presetAng: 20
+  },
+  3: {
+    name: '第三关 · 引力自拍火柴人',
+    label: '当前底图: 魔性火柴人大头人像',
+    generator: generateStickmanCanvas,
+    onlineUrls: [], // 直接使用高保真火柴人画布
+    presetTE: 80,
+    presetQ: 0.85,
+    presetAng: 0
+  }
+};
+
+function tryLoadImageUrls(urls, onDone, onFail) {
+  if (!urls || urls.length === 0) {
+    if (onFail) onFail();
+    return;
+  }
+  let idx = 0;
+  const loadNext = () => {
+    if (idx >= urls.length) {
+      if (onFail) onFail();
+      return;
+    }
+    const url = urls[idx++];
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => onDone(img);
+    img.onerror = () => loadNext();
+    img.src = url;
+  };
+  loadNext();
+}
+
+function switchStage(stageNum) {
+  currentStage = stageNum;
+
+  // 更新卡片激活态 UI
+  for (let s = 1; s <= 3; s++) {
+    const card = document.getElementById(`stageCard${s}`);
+    if (s === stageNum) {
+      card.classList.remove('opacity-80');
+      card.classList.add('ring-2', 'ring-cyber-accent', 'shadow-cyber-accent/20');
+    } else {
+      card.classList.add('opacity-80');
+      card.classList.remove('ring-2', 'ring-cyber-accent', 'shadow-cyber-accent/20');
+    }
+  }
+
+  const cfg = STAGE_CONFIG[stageNum];
+  document.getElementById('currentImgLabel').textContent = cfg.label;
+
+  // 设定该关推荐的透镜物理参数
+  setLensPreset(cfg.presetTE, cfg.presetQ, cfg.presetAng);
+
+  // 尝试加载图片：优先生成高品质离线 Canvas 立即显示，确保永不白屏
+  const canvasSource = cfg.generator();
+  uploadImageToGL(canvasSource);
+
+  // 异步加载指定的高清图片 (哈勃极深场原图或风景图)
+  if (cfg.onlineUrls && cfg.onlineUrls.length > 0) {
+    tryLoadImageUrls(cfg.onlineUrls, (img) => {
+      if (currentStage === stageNum) {
+        uploadImageToGL(img);
+      }
+    });
+  }
+
+  updateStarUI();
+  playSynthSound('click');
+}
+
+// 用户自定义上传任意照片
+document.getElementById('fileUploadInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const img = new Image();
+    img.onload = () => {
+      uploadImageToGL(img);
+      document.getElementById('currentImgLabel').textContent = `自定义上传: ${file.name}`;
+      playSynthSound('click');
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+// 通关导出并获得星星功能
+function exportLensedImageAndEarnStar() {
+  // 必须先交互过或者以当前效果导出
+  if (!lens.hasInteracted) {
+    // 自动激活一次轻度透镜化
+    lens.target = 1.0;
+    lens.strength = 1.0;
+    lens.hasInteracted = true;
+  }
+
+  // 1. 离线创建合成相框与纪念印章
+  const outCanvas = document.createElement('canvas');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const w = canvas.width, h = canvas.height;
+  outCanvas.width = w;
+  outCanvas.height = h;
+
+  const outCtx = outCanvas.getContext('2d');
+  // 绘制当前 WebGL 画面
+  outCtx.drawImage(canvas, 0, 0);
+
+  // 绘制探险打卡水印
+  const pad = 24 * dpr;
+  outCtx.save();
+  outCtx.fillStyle = 'rgba(5, 7, 14, 0.75)';
+  outCtx.fillRect(pad, h - pad - 42 * dpr, 360 * dpr, 38 * dpr);
+  outCtx.strokeStyle = '#38bdf8';
+  outCtx.lineWidth = 2 * dpr;
+  outCtx.strokeRect(pad, h - pad - 42 * dpr, 360 * dpr, 38 * dpr);
+
+  outCtx.fillStyle = '#ffffff';
+  outCtx.font = `bold ${14 * dpr}px sans-serif`;
+  outCtx.fillText(`⭐ 引力透镜探险 · 第 ${currentStage} 关打卡纪念`, pad + 12 * dpr, h - pad - 18 * dpr);
+  outCtx.restore();
+
+  // 2. 触发下载
+  const dataURL = outCanvas.toDataURL('image/jpeg', 0.92);
+  const a = document.createElement('a');
+  a.download = `Gravitational_Lensing_Stage_${currentStage}_Artwork.jpg`;
+  a.href = dataURL;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  // 3. 点亮星星与关卡完成度
+  completedStages.add(currentStage);
+  updateStarUI();
+
+  playSynthSound('star');
+
+  // 如果达到 3 颗星全满，弹出荣誉表彰弹窗
+  if (completedStages.size === 3) {
+    setTimeout(() => {
+      document.getElementById('victoryModal').classList.remove('hidden');
+    }, 700);
+  } else {
+    // 自动提示前往下一关
+    const nextStage = currentStage < 3 ? currentStage + 1 : 1;
+    setTimeout(() => {
+      switchStage(nextStage);
+    }, 900);
+  }
+}
+
+// 统一的星形 SVG 生成函数：空心 vs 实心
+const HOLLOW_STAR_SVG = `<svg class="w-full h-full fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>`;
+const SOLID_STAR_SVG = `<svg class="w-full h-full fill-current" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>`;
+
+function updateStarUI() {
+  for (let s = 1; s <= 3; s++) {
+    const isEarned = completedStages.has(s);
+    const starSlot = document.getElementById(`starSlot${s}`);
+    const starIcon = document.getElementById(`starIcon${s}`);
+    const badge = document.getElementById(`badgeStage${s}`);
+
+    if (isEarned) {
+      // 顶部 HUD 星星：实心金星
+      starSlot.className = 'w-5 h-5 text-cyber-gold star-earned transition-all duration-300';
+      starSlot.innerHTML = SOLID_STAR_SVG;
+
+      // 关卡卡片星星：实心金星 + 发光动效
+      starIcon.className = 'w-6 h-6 text-cyber-gold star-earned transition-all duration-300';
+      starIcon.innerHTML = SOLID_STAR_SVG;
+
+      // 打上已通关标签
+      badge.textContent = '已通关 ⭐';
+      badge.className = 'text-[10px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold';
+    } else {
+      // 通关前：空心轮廓星
+      starSlot.className = 'w-5 h-5 text-slate-600 transition-all duration-300';
+      starSlot.innerHTML = HOLLOW_STAR_SVG;
+
+      starIcon.className = 'w-6 h-6 text-slate-600 transition-all duration-300';
+      starIcon.innerHTML = HOLLOW_STAR_SVG;
+
+      if (currentStage === s) {
+        badge.textContent = '进行中';
+        badge.className = 'text-[10px] px-1.5 py-0.2 rounded bg-sky-500/10 text-sky-300 border border-sky-500/30';
+      } else {
+        badge.textContent = '未通关';
+        badge.className = 'text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-500 border border-slate-700';
+      }
+    }
+  }
+
+  const count = completedStages.size;
+  document.getElementById('starCounterText').textContent = `${count}/3`;
+}
+
+function resetGameProgress() {
+  completedStages.clear();
+  updateStarUI();
+  switchStage(1);
+  resetLensToFlat();
+  playSynthSound('click');
+}
+/* =====================================================================
+ * WebGL 逐帧渲染循环
+ * ===================================================================== */
+let lastFrameTime = performance.now();
+let fpsFrames = 0, fpsLastUpdate = 0;
+
+function renderLoop(now) {
+  const dt = Math.min(0.05, (now - lastFrameTime) / 1000);
+  lastFrameTime = now;
+
+  // FPS 统计
+  fpsFrames++;
+  if (now - fpsLastUpdate > 600) {
+    const fps = Math.round((fpsFrames * 1000) / (now - fpsLastUpdate));
+    document.getElementById('fpsBadge').textContent = `${fps} FPS`;
+    fpsFrames = 0;
+    fpsLastUpdate = now;
+  }
+
+  // 透镜平滑插值过渡 (位置)
+  const kPos = 1 - Math.exp(-dt * 20);
+  lens.cx += (lens.tx - lens.cx) * kPos;
+  lens.cy += (lens.ty - lens.cy) * kPos;
+
+  // 透镜强度插值：激活时迅速升至 1.0 并稳定保持
+  const kStrength = 1 - Math.exp(-dt * 14);
+  lens.strength += (lens.target - lens.strength) * kStrength;
+
+  // 绑定纹理与 Shader Uniform
+  gl.uniform1i(U.u_tex, 0);
+  gl.uniform2f(U.u_res, canvas.width, canvas.height);
+  gl.uniform2f(U.u_center, lens.cx, lens.cy);
+
+  // θE 按画布对角线基准等比缩放
+  const refDiag = Math.hypot(1350, 900);
+  const curDiag = Math.hypot(canvas.width, canvas.height);
+  const scaleRatio = curDiag / refDiag;
+
+  gl.uniform1f(U.u_thetaE, P.thetaE * scaleRatio);
+  gl.uniform1f(U.u_q, P.q);
+  gl.uniform1f(U.u_angle, P.angleDeg * Math.PI / 180);
+  gl.uniform1f(U.u_strength, lens.strength);
+
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+  requestAnimationFrame(renderLoop);
+}
+
+// 页面加载完成后启动
+window.onload = function () {
+  switchStage(1);
+  requestAnimationFrame(renderLoop);
+};
+</script>
+</body>
+</html>
