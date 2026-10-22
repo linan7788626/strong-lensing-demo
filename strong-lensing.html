@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>强引力透镜前沿教学实验室 — SIE + Gaussian + Mock</title>
+<title data-i18n="title">强引力透镜课堂与仿真实验室</title>
 <!-- 字体: jsdelivr fontsource 变量字体 (加载失败时优雅回退系统字体) -->
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/inter@5/index.min.css">
@@ -176,6 +176,10 @@
     position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; pointer-events: none;
     background: linear-gradient(90deg, transparent 4%, rgba(99,151,255,0.55) 32%, rgba(217,102,255,0.45) 62%, transparent 96%);
   }
+
+  /* ===== 语言开关: 当前语言高亮态 ===== */
+  #langZH, #langEN { transition: background 0.2s, color 0.2s; }
+  .lang-on { background: linear-gradient(135deg, #2563eb, #4f46e5) !important; color: #fff !important; }
 </style>
 </head>
 <body class="bg-cosmic-950 text-slate-100 min-h-screen selection:bg-cosmic-accent selection:text-white flex flex-col font-sans antialiased">
@@ -198,7 +202,7 @@
       </div>
       <div>
         <div class="flex items-center gap-2">
-          <h1 class="text-lg lg:text-xl font-bold tracking-tight bg-gradient-to-r from-blue-200 via-indigo-100 to-purple-200 bg-clip-text text-transparent">
+          <h1 class="text-lg lg:text-xl font-bold tracking-tight bg-gradient-to-r from-blue-200 via-indigo-100 to-purple-200 bg-clip-text text-transparent" data-i18n="title">
             强引力透镜课堂与仿真实验室
           </h1>
           <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">SIE + Gaussian</span>
@@ -210,15 +214,20 @@
     <div class="flex items-center gap-2 flex-wrap">
       <span class="text-xs text-slate-400 font-medium mr-1 hidden md:inline-flex items-center gap-1.5">
         <svg class="w-3.5 h-3.5 text-amber-400 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-        <span>经典透镜拓扑预设:</span>
+        <span data-i18n="presetsLabel">经典透镜拓扑预设:</span>
       </span>
-      <button onclick="applyPreset('cross')" class="preset-chip px-2.5 py-1 text-xs font-medium rounded-lg bg-cosmic-800/80 hover:bg-cosmic-700 text-slate-200 border border-cosmic-600/50 hover:border-cosmic-accent hover:text-white">十字四像 (Cross)</button>
-      <button onclick="applyPreset('ring')" class="preset-chip px-2.5 py-1 text-xs font-medium rounded-lg bg-cosmic-800/80 hover:bg-cosmic-700 text-slate-200 border border-cosmic-600/50 hover:border-cosmic-accent hover:text-white">爱因斯坦环 (Ring)</button>
-      <button onclick="applyPreset('cusp')" class="preset-chip px-2.5 py-1 text-xs font-medium rounded-lg bg-cosmic-800/80 hover:bg-cosmic-700 text-slate-200 border border-cosmic-600/50 hover:border-cosmic-accent hover:text-white">尖点折叠长弧 (Cusp)</button>
-      <button onclick="applyPreset('double')" class="preset-chip px-2.5 py-1 text-xs font-medium rounded-lg bg-cosmic-800/80 hover:bg-cosmic-700 text-slate-200 border border-cosmic-600/50 hover:border-cosmic-accent hover:text-white">经典双像 (Double)</button>
-      <button onclick="resetDefault()" class="preset-chip p-1.5 text-xs rounded-lg bg-cosmic-850 hover:bg-red-500/20 text-slate-400 hover:text-red-400 border border-cosmic-700 transition" title="重置全部参数">
+      <button onclick="applyPreset('cross')" class="preset-chip px-2.5 py-1 text-xs font-medium rounded-lg bg-cosmic-800/80 hover:bg-cosmic-700 text-slate-200 border border-cosmic-600/50 hover:border-cosmic-accent hover:text-white" data-i18n="presetCross">十字四像</button>
+      <button onclick="applyPreset('ring')" class="preset-chip px-2.5 py-1 text-xs font-medium rounded-lg bg-cosmic-800/80 hover:bg-cosmic-700 text-slate-200 border border-cosmic-600/50 hover:border-cosmic-accent hover:text-white" data-i18n="presetRing">爱因斯坦环</button>
+      <button onclick="applyPreset('cusp')" class="preset-chip px-2.5 py-1 text-xs font-medium rounded-lg bg-cosmic-800/80 hover:bg-cosmic-700 text-slate-200 border border-cosmic-600/50 hover:border-cosmic-accent hover:text-white" data-i18n="presetCusp">尖点折叠长弧</button>
+      <button onclick="applyPreset('double')" class="preset-chip px-2.5 py-1 text-xs font-medium rounded-lg bg-cosmic-800/80 hover:bg-cosmic-700 text-slate-200 border border-cosmic-600/50 hover:border-cosmic-accent hover:text-white" data-i18n="presetDouble">经典双像</button>
+      <button onclick="resetDefault()" class="preset-chip p-1.5 text-xs rounded-lg bg-cosmic-850 hover:bg-red-500/20 text-slate-400 hover:text-red-400 border border-cosmic-700 transition" title="重置全部参数" data-i18n-title="resetTitle">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
       </button>
+      <!-- 中英双语一键切换 (记忆于 localStorage) -->
+      <div class="flex items-center rounded-lg overflow-hidden border border-cosmic-600 text-xs font-semibold" role="group" aria-label="Language switch">
+        <button id="langZH" onclick="applyLang('zh')" class="lang-on px-2.5 py-1.5 bg-cosmic-800 text-slate-200">中文</button>
+        <button id="langEN" onclick="applyLang('en')" class="px-2.5 py-1.5 bg-cosmic-850 text-slate-400 hover:text-slate-100">EN</button>
+      </div>
       <a href="playground.html" class="btn-press ml-2 inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/25 hover:shadow-lg hover:shadow-blue-500/40 hover:from-blue-500 hover:to-indigo-500 group">
         <span>Playground</span>
         <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
@@ -227,78 +236,24 @@
   </div>
 </header>
 
-<!-- 实时透镜物理与像拓扑指示标尺 (HUD Summary) -->
-<section class="relative z-10 max-w-[1920px] mx-auto w-full px-4 lg:px-8 py-3">
-  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-    <!-- 拓扑状态 -->
-    <div class="glass-card lift reveal reveal-1 rounded-xl p-2.5 flex items-center justify-between border-l-4 border-l-indigo-500">
-      <div>
-        <div class="text-[11px] text-slate-400 tracking-wide">像数目与拓扑</div>
-        <div id="stat_numImages" class="text-sm font-bold text-white font-mono">4 像 (Quad)</div>
-      </div>
-      <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50"></span>
-    </div>
-    <!-- 极大放大率 -->
-    <div class="glass-card lift reveal reveal-2 rounded-xl p-2.5 flex items-center justify-between border-l-4 border-l-emerald-500">
-      <div>
-        <div class="text-[11px] text-slate-400 tracking-wide">极大局部放大率</div>
-        <div id="stat_maxMu" class="text-sm font-bold text-emerald-400 font-mono">μ = 12.8</div>
-      </div>
-      <svg class="w-4 h-4 text-emerald-400/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
-    </div>
-    <!-- 爱因斯坦半径 -->
-    <div class="glass-card lift reveal reveal-3 rounded-xl p-2.5 flex items-center justify-between border-l-4 border-l-amber-500">
-      <div>
-        <div class="text-[11px] text-slate-400 tracking-wide">爱因斯坦半径 θE</div>
-        <div id="stat_tE" class="text-sm font-bold text-amber-300 font-mono">1.60″</div>
-      </div>
-      <svg class="w-4 h-4 text-amber-400/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" stroke-width="2"/><path d="M12 12l5.66-5.66" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg>
-    </div>
-    <!-- 透镜椭率 -->
-    <div class="glass-card lift reveal reveal-4 rounded-xl p-2.5 flex items-center justify-between border-l-4 border-l-purple-500">
-      <div>
-        <div class="text-[11px] text-slate-400 tracking-wide">透镜轴比 q / 椭率 e</div>
-        <div id="stat_ell" class="text-sm font-bold text-purple-300 font-mono">q=0.75 (e=0.25)</div>
-      </div>
-      <svg class="w-4 h-4 text-purple-400/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="9" ry="5" transform="rotate(-30 12 12)" stroke="currentColor" stroke-width="2" fill="none"/></svg>
-    </div>
-    <!-- 望远镜与像元 -->
-    <div class="glass-card lift reveal reveal-5 rounded-xl p-2.5 flex items-center justify-between border-l-4 border-l-cyan-500">
-      <div>
-        <div class="text-[11px] text-slate-400 tracking-wide">当前仿真仪器</div>
-        <div id="stat_tel" class="text-sm font-bold text-cyan-300 truncate max-w-[130px]">CSST 巡天</div>
-      </div>
-      <span id="stat_pix" class="text-xs text-cyan-400 font-mono">0.074″/px</span>
-    </div>
-    <!-- 交互提示 -->
-    <div class="glass-card lift reveal reveal-6 rounded-xl p-2.5 flex items-center justify-between border-l-4 border-l-blue-500 bg-blue-950/20">
-      <div>
-        <div class="text-[11px] text-blue-300 tracking-wide">交互提示</div>
-        <div class="text-xs font-semibold text-slate-200">在画布中直接拖拽</div>
-      </div>
-      <span class="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300">拖拽源/透镜</span>
-    </div>
-  </div>
-</section>
-
-<!-- 图例条 (统一展示，画布内不再压冗杂文字) -->
-<section class="relative z-10 max-w-[1920px] mx-auto w-full px-4 lg:px-8 py-1 reveal reveal-3">
-  <div class="glass-card rounded-xl px-4 py-2 flex flex-wrap items-center justify-center gap-6 text-xs text-slate-300">
+<!-- 图例条 (统一展示，画布内不再压冗杂文字；交互提示并入本行) -->
+<section class="relative z-10 max-w-[1920px] mx-auto w-full px-4 lg:px-8 py-3 reveal reveal-3">
+  <div class="glass-card rounded-xl px-4 py-2.5 flex flex-wrap items-center justify-center gap-x-6 gap-y-1.5 text-sm text-slate-200">
     <div class="flex items-center gap-2">
       <span class="inline-block w-4 h-0.5 bg-cosmic-crit"></span>
-      <span>临界曲线 Critical Curve (<span class="font-mono text-cosmic-crit">det A = 0</span>, 透镜平面)</span>
+      <span data-i18n-html="legendCritical">临界曲线 (<span class="font-mono text-cosmic-crit">det A = 0</span> · 透镜平面)</span>
     </div>
     <div class="flex items-center gap-2">
-      <span class="inline-block w-4 h-0.5 bg-cosmic-caust"></span>
-      <span>焦散线 Caustic (<span class="font-mono text-cosmic-caust">β-plane</span>, 多像边界)</span>
+      <span class="inline-block w-4 h-0.5 bg-emerald-400"></span>
+      <span data-i18n-html="legendCaustic">焦散线 (<span class="font-mono text-emerald-400">源平面</span> · 多像边界)</span>
     </div>
     <div class="flex items-center gap-2">
-      <span class="inline-block w-4 h-0.5 border-t border-dashed border-cosmic-src"></span>
-      <span>源半光半径等高线 Half-light (<span class="font-mono text-cosmic-src">r_h</span>)</span>
+      <span class="inline-block w-4 h-0.5 border-t border-solid border-cosmic-src"></span>
+      <span data-i18n-html="legendHalflight">源半光半径等高线 (<span class="font-mono text-cosmic-src">r_h</span>)</span>
     </div>
     <div class="flex items-center gap-2">
-      <span class="inline-block w-3 h-3 rounded-full border border-white bg-white/20"></span>
-      <span>几何像位置点与放大率 (<span class="font-mono text-white">Image μ</span>)</span>
+      <span class="px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 text-xs font-semibold">🖱 <span data-i18n="legendHintBadge">交互提示</span></span>
+      <span data-i18n="legendHint">可直接在源/透镜画布中拖拽移动中心</span>
     </div>
   </div>
 </section>
@@ -313,9 +268,9 @@
       <div class="flex items-center justify-between border-b border-cosmic-700/60 pb-3">
         <div class="flex items-center gap-2.5">
           <span class="w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-bold font-mono text-cosmic-src bg-cosmic-src/10 border border-cosmic-src/30">01</span>
-          <h2 class="text-base font-bold tracking-wide bg-gradient-to-r from-slate-100 to-cosmic-src bg-clip-text text-transparent">源平面 · Source Plane</h2>
+          <h2 class="text-base font-bold tracking-wide bg-gradient-to-r from-slate-100 to-cosmic-src bg-clip-text text-transparent" data-i18n="srcTitle">源平面</h2>
         </div>
-        <span class="text-xs font-mono text-slate-400 bg-cosmic-800 px-2 py-0.5 rounded border border-cosmic-700">β-空间 (±10″)</span>
+        <span class="text-xs font-mono text-slate-400 bg-cosmic-800 px-2 py-0.5 rounded border border-cosmic-700" data-i18n="srcSpace">β 空间 (±10″)</span>
       </div>
 
       <!-- 画布视口 -->
@@ -323,14 +278,23 @@
         <canvas id="srcCanvas" class="w-full h-full block interactive-canvas" width="600" height="600"></canvas>
         <div id="srcHud" class="canvas-hud flex flex-col justify-between p-3 opacity-90 transition">
           <div class="flex justify-between items-start">
-            <span class="text-[10px] font-mono bg-black/60 backdrop-blur px-1.5 py-0.5 rounded text-cosmic-src border border-cosmic-src/30">
-              点拖移动源心 (βx, βy)
+            <span class="text-[13px] font-mono bg-black/60 backdrop-blur px-1.5 py-0.5 rounded text-cosmic-src border border-cosmic-src/30" data-i18n="srcDrag">
+              点拖移动源心
             </span>
-            <span id="srcCoordReadout" class="text-[10px] font-mono bg-black/60 px-1.5 py-0.5 rounded text-slate-300">
+            <span id="srcCoordReadout" class="text-[13px] font-mono bg-black/60 px-1.5 py-0.5 rounded text-slate-300">
               (0.40″, 1.20″)
             </span>
           </div>
         </div>
+      </div>
+
+      <!-- 显示内容选择: 源光亮度图 / 半光等高线 (二选一, 同时控制源平面与透镜平面) -->
+      <div class="flex items-center gap-2 text-xs">
+        <label class="w-32 text-slate-400 font-medium truncate" data-i18n="srcViewLabel">平面显示内容:</label>
+        <select id="srcView" class="flex-1 bg-cosmic-800 border border-cosmic-600 rounded-lg px-2.5 py-1.5 text-slate-100 font-sans focus:outline-none focus:border-cosmic-accent">
+          <option value="light" data-i18n="viewLight">源光亮度图</option>
+          <option value="contour" data-i18n="viewContour">半光半径等高线</option>
+        </select>
       </div>
 
       <!-- 参数控制抽屉 -->
@@ -338,37 +302,37 @@
         <div class="grid grid-cols-1 gap-2">
           <!-- Source X -->
           <div class="flex items-center gap-2">
-            <label class="w-32 text-slate-400 truncate">源位置 X (βx)</label>
+            <label class="w-32 text-slate-400 truncate" data-i18n="srcX">源位置 X (βx)</label>
             <input type="range" id="sx" min="-6" max="6" step="0.05" value="0.4" class="flex-1">
             <output id="sx_v" class="w-16 font-mono text-right text-cosmic-src bg-cosmic-800 px-1.5 py-0.5 rounded border border-cosmic-700">0.40″</output>
           </div>
           <!-- Source Y -->
           <div class="flex items-center gap-2">
-            <label class="w-32 text-slate-400 truncate">源位置 Y (βy)</label>
+            <label class="w-32 text-slate-400 truncate" data-i18n="srcY">源位置 Y (βy)</label>
             <input type="range" id="sy" min="-6" max="6" step="0.05" value="1.2" class="flex-1">
             <output id="sy_v" class="w-16 font-mono text-right text-cosmic-src bg-cosmic-800 px-1.5 py-0.5 rounded border border-cosmic-700">1.20″</output>
           </div>
           <!-- Source Magnitude -->
           <div class="flex items-center gap-2">
-            <label class="w-32 text-slate-400 truncate">源 AB星等 (m_AB)</label>
+            <label class="w-32 text-slate-400 truncate" data-i18n="srcMag">源星等 (m_AB)</label>
             <input type="range" id="mab" min="16" max="27" step="0.1" value="20" class="flex-1">
             <output id="mab_v" class="w-16 font-mono text-right text-slate-200 bg-cosmic-800 px-1.5 py-0.5 rounded border border-cosmic-700">20.00</output>
           </div>
           <!-- Source Size sigma -->
           <div class="flex items-center gap-2">
-            <label class="w-32 text-slate-400 truncate">源尺寸 R_e</label>
+            <label class="w-32 text-slate-400 truncate" data-i18n="srcSize">源尺寸 (R_e)</label>
             <input type="range" id="ssize" min="0.05" max="2" step="0.05" value="0.5" class="flex-1">
             <output id="ssize_v" class="w-16 font-mono text-right text-slate-200 bg-cosmic-800 px-1.5 py-0.5 rounded border border-cosmic-700">0.50″</output>
           </div>
           <!-- Source axis ratio -->
           <div class="flex items-center gap-2">
-            <label class="w-32 text-slate-400 truncate">源轴比 (q_src)</label>
+            <label class="w-32 text-slate-400 truncate" data-i18n="srcQ">源轴比 (q_src)</label>
             <input type="range" id="sell" min="0.2" max="1" step="0.01" value="0.7" class="flex-1">
             <output id="sell_v" class="w-16 font-mono text-right text-slate-200 bg-cosmic-800 px-1.5 py-0.5 rounded border border-cosmic-700">0.70</output>
           </div>
           <!-- Source PA -->
           <div class="flex items-center gap-2">
-            <label class="w-32 text-slate-400 truncate">方位角 (PA)</label>
+            <label class="w-32 text-slate-400 truncate" data-i18n="srcPA">方位角 (PA)</label>
             <input type="range" id="sang" min="0" max="180" step="1" value="30" class="flex-1">
             <output id="sang_v" class="w-16 font-mono text-right text-slate-200 bg-cosmic-800 px-1.5 py-0.5 rounded border border-cosmic-700">30.00°</output>
           </div>
@@ -382,9 +346,9 @@
       <div class="flex items-center justify-between border-b border-cosmic-700/60 pb-3">
         <div class="flex items-center gap-2.5">
           <span class="w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-bold font-mono text-cosmic-lens bg-cosmic-lens/10 border border-cosmic-lens/30">02</span>
-          <h2 class="text-base font-bold tracking-wide bg-gradient-to-r from-slate-100 to-cosmic-lens bg-clip-text text-transparent">透镜平面 · Lens Plane</h2>
+          <h2 class="text-base font-bold tracking-wide bg-gradient-to-r from-slate-100 to-cosmic-lens bg-clip-text text-transparent" data-i18n="lensTitle">透镜平面</h2>
         </div>
-        <span class="text-xs font-mono text-slate-400 bg-cosmic-800 px-2 py-0.5 rounded border border-cosmic-700">θ-空间 (±10″)</span>
+        <span class="text-xs font-mono text-slate-400 bg-cosmic-800 px-2 py-0.5 rounded border border-cosmic-700" data-i18n="lensSpace">θ 空间 (±10″)</span>
       </div>
 
       <!-- 画布视口 -->
@@ -392,10 +356,10 @@
         <canvas id="lensCanvas" class="w-full h-full block interactive-canvas" width="600" height="600"></canvas>
         <div id="lensHud" class="canvas-hud flex flex-col justify-between p-3 opacity-90 transition">
           <div class="flex justify-between items-start">
-            <span class="text-[10px] font-mono bg-black/60 backdrop-blur px-1.5 py-0.5 rounded text-cosmic-lens border border-cosmic-lens/30">
-              点拖移动透镜中心 (θx, θy)
+            <span class="text-[13px] font-mono bg-black/60 backdrop-blur px-1.5 py-0.5 rounded text-cosmic-lens border border-cosmic-lens/30" data-i18n="lensDrag">
+              点拖移动透镜中心
             </span>
-            <span id="lensCoordReadout" class="text-[10px] font-mono bg-black/60 px-1.5 py-0.5 rounded text-slate-300">
+            <span id="lensCoordReadout" class="text-[13px] font-mono bg-black/60 px-1.5 py-0.5 rounded text-slate-300">
               (0.00″, 0.00″)
             </span>
           </div>
@@ -407,59 +371,29 @@
         <!-- 透镜质量参数 -->
         <div class="grid grid-cols-1 gap-2">
           <div class="flex items-center gap-2">
-            <label class="w-32 text-slate-400 truncate">透镜位置 X (θlx)</label>
+            <label class="w-32 text-slate-400 truncate" data-i18n="lensX">透镜位置 X (θlx)</label>
             <input type="range" id="lx" min="-4" max="4" step="0.05" value="0" class="flex-1">
             <output id="lx_v" class="w-16 font-mono text-right text-cosmic-lens bg-cosmic-800 px-1.5 py-0.5 rounded border border-cosmic-700">0.00″</output>
           </div>
           <div class="flex items-center gap-2">
-            <label class="w-32 text-slate-400 truncate">透镜位置 Y (θly)</label>
+            <label class="w-32 text-slate-400 truncate" data-i18n="lensY">透镜位置 Y (θly)</label>
             <input type="range" id="ly" min="-4" max="4" step="0.05" value="0" class="flex-1">
             <output id="ly_v" class="w-16 font-mono text-right text-cosmic-lens bg-cosmic-800 px-1.5 py-0.5 rounded border border-cosmic-700">0.00″</output>
           </div>
           <div class="flex items-center gap-2">
-            <label class="w-32 text-slate-400 truncate">爱因斯坦半径 θ_E</label>
+            <label class="w-32 text-slate-400 truncate" data-i18n="lensTE">爱因斯坦半径 (θE)</label>
             <input type="range" id="tE" min="0.5" max="6" step="0.05" value="1.6" class="flex-1">
             <output id="tE_v" class="w-16 font-mono text-right text-amber-300 bg-cosmic-800 px-1.5 py-0.5 rounded border border-cosmic-700">1.60″</output>
           </div>
           <div class="flex items-center gap-2">
-            <label class="w-32 text-slate-400 truncate">透镜轴比 (q_lens)</label>
+            <label class="w-32 text-slate-400 truncate" data-i18n="lensQ">透镜轴比 (q_lens)</label>
             <input type="range" id="lell" min="0.2" max="1" step="0.01" value="0.75" class="flex-1">
             <output id="lell_v" class="w-16 font-mono text-right text-slate-200 bg-cosmic-800 px-1.5 py-0.5 rounded border border-cosmic-700">0.75</output>
           </div>
           <div class="flex items-center gap-2">
-            <label class="w-32 text-slate-400 truncate">方位角 (PA_lens)</label>
+            <label class="w-32 text-slate-400 truncate" data-i18n="lensPA">方位角 (PA_lens)</label>
             <input type="range" id="lang" min="0" max="180" step="1" value="60" class="flex-1">
             <output id="lang_v" class="w-16 font-mono text-right text-slate-200 bg-cosmic-800 px-1.5 py-0.5 rounded border border-cosmic-700">60.00°</output>
-          </div>
-        </div>
-
-        <!-- 透镜星系发光 (Sérsic) -->
-        <div class="mt-1 pt-2 border-t border-cosmic-700/60">
-          <div class="flex items-center justify-between mb-1.5">
-            <span class="font-semibold text-cosmic-accent flex items-center gap-1.5">
-              <span>透镜星系光 (Sérsic Light)</span>
-            </span>
-            <label class="inline-flex items-center gap-1.5 cursor-pointer text-slate-300">
-              <input type="checkbox" id="llight" checked class="w-3.5 h-3.5 rounded bg-cosmic-800 border-cosmic-600 text-cosmic-accent focus:ring-0">
-              <span class="text-[11px]">叠加透镜光</span>
-            </label>
-          </div>
-          <div class="grid grid-cols-1 gap-2">
-            <div class="flex items-center gap-2">
-              <label class="w-32 text-slate-400 truncate">透镜星等 (m_AB)</label>
-              <input type="range" id="lmab" min="14" max="28" step="0.1" value="18" class="flex-1">
-              <output id="lmab_v" class="w-16 font-mono text-right text-slate-200 bg-cosmic-800 px-1.5 py-0.5 rounded border border-cosmic-700">18.00</output>
-            </div>
-            <div class="flex items-center gap-2">
-              <label class="w-32 text-slate-400 truncate">有效半径 (r_e)</label>
-              <input type="range" id="re" min="0.2" max="5" step="0.05" value="1.5" class="flex-1">
-              <output id="re_v" class="w-16 font-mono text-right text-slate-200 bg-cosmic-800 px-1.5 py-0.5 rounded border border-cosmic-700">1.50″</output>
-            </div>
-            <div class="flex items-center gap-2">
-              <label class="w-32 text-slate-400 truncate">Sérsic 指数 (n)</label>
-              <input type="range" id="sersic" min="0.5" max="6" step="0.1" value="4" class="flex-1">
-              <output id="sersic_v" class="w-16 font-mono text-right text-slate-200 bg-cosmic-800 px-1.5 py-0.5 rounded border border-cosmic-700">4.00</output>
-            </div>
           </div>
         </div>
       </div>
@@ -471,7 +405,7 @@
       <div class="flex items-center justify-between border-b border-cosmic-700/60 pb-3">
         <div class="flex items-center gap-2.5">
           <span class="w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-bold font-mono text-emerald-300 bg-emerald-400/10 border border-emerald-400/30">03</span>
-          <h2 class="text-base font-bold tracking-wide bg-gradient-to-r from-slate-100 to-emerald-300 bg-clip-text text-transparent">望远镜巡天观测 · Mock</h2>
+          <h2 class="text-base font-bold tracking-wide bg-gradient-to-r from-slate-100 to-emerald-300 bg-clip-text text-transparent" data-i18n="mockTitle">仪器模拟观测</h2>
         </div>
         <div id="mockStatusBadge" class="text-xs font-mono px-2 py-0.5 rounded bg-blue-500/10 text-blue-300 border border-blue-500/30">
           理想几何像
@@ -483,10 +417,10 @@
         <canvas id="mockCanvas" class="w-full h-full block" width="600" height="600"></canvas>
         <div id="mockHud" class="canvas-hud flex flex-col justify-between p-3 opacity-90 transition">
           <div class="flex justify-between items-start">
-            <span id="hudMockName" class="text-[10px] font-mono bg-black/60 backdrop-blur px-1.5 py-0.5 rounded text-emerald-300 border border-emerald-500/30">
-              CSST (巡天空间望远镜)
+            <span id="hudMockName" class="text-[13px] font-mono bg-black/60 backdrop-blur px-1.5 py-0.5 rounded text-emerald-300 border border-emerald-500/30">
+              CSST (中国巡天空间望远镜)
             </span>
-            <span id="hudMockSNR" class="text-[10px] font-mono bg-black/60 px-1.5 py-0.5 rounded text-amber-300">
+            <span id="hudMockSNR" class="text-[13px] font-mono bg-black/60 px-1.5 py-0.5 rounded text-amber-300">
               SNR ≈ 18.2
             </span>
           </div>
@@ -498,26 +432,38 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <!-- 望远镜选择 -->
           <div class="flex flex-col gap-1 sm:col-span-2">
-            <label class="text-slate-400 font-medium">选择目标望远镜与仪器:</label>
+            <label class="text-slate-400 font-medium" data-i18n="mockTelLabel">选择目标望远镜与仪器:</label>
             <select id="telescope" class="bg-cosmic-800 border border-cosmic-600 rounded-lg px-2.5 py-1.5 text-slate-100 font-sans focus:outline-none focus:border-cosmic-accent">
-              <option value="CSST">CSST 巡天空间望远镜</option>
+              <option value="CSST">CSST (中国巡天空间望远镜)</option>
             </select>
           </div>
-          <!-- 噪声模式 -->
-          <div class="flex flex-col gap-1">
-            <label class="text-slate-400 font-medium">噪声标定模型:</label>
-            <select id="noiseMode" class="bg-cosmic-800 border border-cosmic-600 rounded-lg px-2.5 py-1.5 text-slate-100 font-sans focus:outline-none focus:border-cosmic-accent">
-              <option value="instrument">仪器参数 (Poisson + 读出)</option>
-              <option value="limitingMagnitude">极限星等 (Gaussian)</option>
-            </select>
+        </div>
+
+        <!-- 透镜星系前景光 (Sérsic, 已从透镜参数区移入) -->
+        <div class="pt-2 border-t border-cosmic-700/60">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="font-semibold text-cosmic-accent" data-i18n="llTitle">透镜星系前景光 (Sérsic 轮廓)</span>
+            <label class="inline-flex items-center gap-1.5 cursor-pointer text-slate-300">
+              <input type="checkbox" id="llight" checked class="w-3.5 h-3.5 rounded bg-cosmic-800 border-cosmic-600 text-cosmic-accent focus:ring-0">
+              <span class="text-[11px]" data-i18n="llEnable">叠加透镜光</span>
+            </label>
           </div>
-          <!-- 图像单位 -->
-          <div class="flex flex-col gap-1">
-            <label class="text-slate-400 font-medium">渲染像单位:</label>
-            <select id="imgUnit" class="bg-cosmic-800 border border-cosmic-600 rounded-lg px-2.5 py-1.5 text-slate-100 font-sans focus:outline-none focus:border-cosmic-accent">
-              <option value="electron">electron (e⁻)</option>
-              <option value="flux">flux (Jy)</option>
-            </select>
+          <div class="grid grid-cols-1 gap-2">
+            <div class="flex items-center gap-2">
+              <label class="w-32 text-slate-400 truncate" data-i18n="llMag">透镜星等 (m_AB)</label>
+              <input type="range" id="lmab" min="14" max="28" step="0.1" value="18" class="flex-1">
+              <output id="lmab_v" class="w-16 font-mono text-right text-slate-200 bg-cosmic-800 px-1.5 py-0.5 rounded border border-cosmic-700">18.00</output>
+            </div>
+            <div class="flex items-center gap-2">
+              <label class="w-32 text-slate-400 truncate" data-i18n="llRe">有效半径 (r_e)</label>
+              <input type="range" id="re" min="0.2" max="5" step="0.05" value="1.5" class="flex-1">
+              <output id="re_v" class="w-16 font-mono text-right text-slate-200 bg-cosmic-800 px-1.5 py-0.5 rounded border border-cosmic-700">1.50″</output>
+            </div>
+            <div class="flex items-center gap-2">
+              <label class="w-32 text-slate-400 truncate" data-i18n="llN">Sérsic 指数 (n)</label>
+              <input type="range" id="sersic" min="0.5" max="6" step="0.1" value="4" class="flex-1">
+              <output id="sersic_v" class="w-16 font-mono text-right text-slate-200 bg-cosmic-800 px-1.5 py-0.5 rounded border border-cosmic-700">4.00</output>
+            </div>
           </div>
         </div>
 
@@ -525,9 +471,9 @@
         <div class="flex items-center gap-2 pt-2 border-t border-cosmic-700/60">
           <button id="applyMock" class="btn-press flex-1 py-1.5 px-3 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium shadow-md shadow-blue-500/25 hover:shadow-lg hover:shadow-blue-500/40 flex items-center justify-center gap-1.5">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-            <span>应用仪器效应</span>
+            <span data-i18n="applyMock">应用仪器效应</span>
           </button>
-          <button id="clearMock" class="btn-press py-1.5 px-3 rounded-lg bg-cosmic-800 hover:bg-cosmic-700 text-slate-300 hover:text-white font-medium border border-cosmic-600">
+          <button id="clearMock" class="btn-press py-1.5 px-3 rounded-lg bg-cosmic-800 hover:bg-cosmic-700 text-slate-300 hover:text-white font-medium border border-cosmic-600" data-i18n="clearMock">
             清除 (理想像)
           </button>
         </div>
@@ -548,17 +494,17 @@
     <div class="flex flex-wrap items-center justify-between gap-2 border-b border-cosmic-700/60 pb-3">
       <div class="flex items-center gap-2.5">
         <span class="w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-bold font-mono text-blue-300 bg-blue-400/10 border border-blue-400/30">04</span>
-        <h2 class="text-base font-bold tracking-wide bg-gradient-to-r from-slate-100 to-blue-300 bg-clip-text text-transparent">光路几何追踪 · Ray Tracing 侧视剖面</h2>
+        <h2 class="text-base font-bold tracking-wide bg-gradient-to-r from-slate-100 to-blue-300 bg-clip-text text-transparent" data-i18n="rayTitle">光路几何追踪 (侧视剖面)</h2>
       </div>
       <div class="flex items-center gap-3 text-xs text-slate-400">
-        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block"></span> 源星系 (Source)</span>
-        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span> SIE透镜 (Lens)</span>
-        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-indigo-200 inline-block"></span> 观测者 (Observer)</span>
+        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block"></span> <span data-i18n="raySource">源星系</span></span>
+        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span> <span data-i18n="rayLens">SIE 透镜</span></span>
+        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-indigo-200 inline-block"></span> <span data-i18n="rayObserver">观测者</span></span>
       </div>
     </div>
 
     <div class="rounded-xl overflow-hidden border border-cosmic-700 bg-black canvas-frame">
-      <canvas id="rayCanvas" class="w-full block" width="1880" height="280"></canvas>
+      <canvas id="rayCanvas" class="w-full block" width="1880" height="300"></canvas>
     </div>
   </div>
 </section>
@@ -568,6 +514,151 @@
 
 <script>
 "use strict";
+/* =====================================================================
+ * 双语支持 (i18n): ZH/EN 一键切换, localStorage 记忆, 语言严格单语不混杂
+ * ===================================================================== */
+let LANG = localStorage.getItem("lensLang") || "zh";
+const TXT = {
+  zh: {
+    title: "强引力透镜课堂与仿真实验室",
+    presetsLabel: "经典透镜拓扑预设:",
+    presetCross: "十字四像", presetRing: "爱因斯坦环",
+    presetCusp: "尖点折叠长弧", presetDouble: "经典双像",
+    resetTitle: "重置全部参数",
+    legendCritical: "临界曲线 (<span class='font-mono text-cosmic-crit'>det A = 0</span> · 透镜平面)",
+    legendCaustic: "焦散线 (<span class='font-mono text-emerald-400'>源平面</span> · 多像边界)",
+    legendHalflight: "源半光半径等高线 (<span class='font-mono text-cosmic-src'>r_h</span>)",
+    legendHintBadge: "交互提示",
+    legendHint: "可直接在源/透镜画布中拖拽移动中心",
+    srcTitle: "源平面", srcSpace: "β 空间 (±10″)",
+    srcDrag: "点拖移动源心",
+    srcViewLabel: "平面显示内容:",
+    viewLight: "源光亮度图", viewContour: "半光半径等高线",
+    srcX: "源位置 X (βx)", srcY: "源位置 Y (βy)",
+    srcMag: "源星等 (m_AB)", srcSize: "源尺寸 (R_e)",
+    srcQ: "源轴比 (q_src)", srcPA: "方位角 (PA)",
+    lensTitle: "透镜平面", lensSpace: "θ 空间 (±10″)",
+    lensDrag: "点拖移动透镜中心",
+    lensX: "透镜位置 X (θlx)", lensY: "透镜位置 Y (θly)",
+    lensTE: "爱因斯坦半径 (θE)", lensQ: "透镜轴比 (q_lens)", lensPA: "方位角 (PA_lens)",
+    mockTitle: "仪器模拟观测", mockTelLabel: "选择目标望远镜与仪器:",
+    llTitle: "透镜星系前景光 (Sérsic 轮廓)", llEnable: "叠加透镜光",
+    llMag: "透镜星等 (m_AB)", llRe: "有效半径 (r_e)", llN: "Sérsic 指数 (n)",
+    applyMock: "应用仪器效应", clearMock: "清除 (理想像)",
+    rayTitle: "光路几何追踪 (侧视剖面)",
+    raySource: "源星系", rayLens: "SIE 透镜", rayObserver: "观测者",
+    raySrcLabel: "源平面", rayLensLabel: "SIE 透镜", rayObsLabel: "观测者",
+    rayUndefl: "未偏折直线光路 (无透镜)",
+    imgLabel: "像",
+    topoCount: "当前几何像数目:",
+    topoCalc: "数值计算中",
+    topo1: "单像 · 弱透镜区 (源位于伪焦散线之外)",
+    topo2: "双像 · 经典双像 (源位于切向焦散线与伪焦散线之间)",
+    topo3: "三像 · 焦散线临界重折叠",
+    topo4: "四像 · 经典四像 (源位于切向焦散线四尖点之内)",
+    badgeIdeal: "理想几何像",
+    snrNoNoise: "SNR: ∞ (无噪)",
+    statusIdeal: "<b>当前模式: 理想无噪像</b> · 未叠加点扩散函数卷积与传感器读出、背景散粒噪声。点击上方「应用仪器效应」查看该巡天望远镜的真实观测效果。",
+    infoIdealHead: "理想像态",
+    infoField: "视场", infoRes: "渲染分辨率", infoLensLight: "透镜光",
+    infoFieldSide: "边长 20″", rgbSynth: "RGB 合成",
+    csstFull: "中国巡天空间望远镜",
+    llOn: "已叠加 Sérsic 轮廓 (峰值面亮度对齐)", llOff: "已关闭",
+    infoNoise: "噪声模型: 仪器参数 (泊松 + 读出, 固定)",
+    infoUnit: "显示单位: 电子计数 (e⁻, 固定)",
+    badgeApplied: "已应用巡天仪器链",
+    snrPerPix: "每像素 SNR ≈",
+    stPix: "像元尺度:", stAperture: "口径:", stBands: "波段合成:",
+    infoAppliedHead: "真实观测链参数",
+    infoMirror: "主镜口径", infoExp: "单帧曝光", infoFrames: "帧",
+    infoPixScale: "探测器像元尺度", infoNeSrc: "目标源未透镜总电子数",
+    infoBkg: "背景水平", infoStretch: "显示拉伸",
+    langBtnEN: "EN", langBtnZH: "中文"
+  },
+  en: {
+    title: "Strong Gravitational Lensing Lab",
+    presetsLabel: "Classic lensing presets:",
+    presetCross: "Einstein Cross", presetRing: "Einstein Ring",
+    presetCusp: "Cusp Arc", presetDouble: "Double",
+    resetTitle: "Reset all parameters",
+    legendCritical: "Critical curve (<span class='font-mono text-cosmic-crit'>det A = 0</span> · lens plane)",
+    legendCaustic: "Caustic (<span class='font-mono text-emerald-400'>source plane</span> · image-multiplicity boundary)",
+    legendHalflight: "Source half-light contour (<span class='font-mono text-cosmic-src'>r_h</span>)",
+    legendHintBadge: "Hint",
+    legendHint: "Drag the source or lens center directly on the canvases",
+    srcTitle: "Source Plane", srcSpace: "β-space (±10″)",
+    srcDrag: "Drag to move source center",
+    srcViewLabel: "Display mode:",
+    viewLight: "Surface brightness", viewContour: "Half-light contours",
+    srcX: "Source X (βx)", srcY: "Source Y (βy)",
+    srcMag: "Source magnitude (m_AB)", srcSize: "Source size (R_e)",
+    srcQ: "Source axis ratio (q_src)", srcPA: "Position angle (PA)",
+    lensTitle: "Lens Plane", lensSpace: "θ-space (±10″)",
+    lensDrag: "Drag to move lens center",
+    lensX: "Lens X (θlx)", lensY: "Lens Y (θly)",
+    lensTE: "Einstein radius (θE)", lensQ: "Lens axis ratio (q_lens)", lensPA: "Lens position angle (PA_lens)",
+    mockTitle: "Mock Observation", mockTelLabel: "Telescope & instrument:",
+    llTitle: "Foreground lens light (Sérsic)", llEnable: "Add lens light",
+    llMag: "Lens magnitude (m_AB)", llRe: "Effective radius (r_e)", llN: "Sérsic index (n)",
+    applyMock: "Apply instrument effects", clearMock: "Clear (ideal image)",
+    rayTitle: "Ray Tracing (side view)",
+    raySource: "Source galaxy", rayLens: "SIE lens", rayObserver: "Observer",
+    raySrcLabel: "Source plane", rayLensLabel: "SIE lens", rayObsLabel: "Observer",
+    rayUndefl: "Undeflected straight path (no lens)",
+    imgLabel: "Image",
+    topoCount: "Number of images:",
+    topoCalc: "computing",
+    topo1: "1 image · weak-lensing regime (source outside the pseudo-caustic)",
+    topo2: "2 images · classic double (source between tangential caustic and pseudo-caustic)",
+    topo3: "3 images · caustic critical folding",
+    topo4: "4 images · classic quad (source inside the astroid caustic)",
+    badgeIdeal: "Ideal image",
+    snrNoNoise: "SNR: ∞ (noise-free)",
+    statusIdeal: "<b>Current mode: ideal noise-free image</b> · No PSF convolution or sensor readout/background shot noise applied. Click \"Apply instrument effects\" above to see the realistic observation.",
+    infoIdealHead: "Ideal-image state",
+    infoField: "Field of view", infoRes: "Render resolution", infoLensLight: "Lens light",
+    infoFieldSide: "side length 20″", rgbSynth: "RGB synthesis",
+    csstFull: "China Space Station Telescope",
+    llOn: "Sérsic profile added (peak surface-brightness aligned)", llOff: "off",
+    infoNoise: "Noise model: instrument parameters (Poisson + readout, fixed)",
+    infoUnit: "Display unit: electron count (e⁻, fixed)",
+    badgeApplied: "Survey chain applied",
+    snrPerPix: "Per-pixel SNR ≈",
+    stPix: "Pixel scale:", stAperture: "Aperture:", stBands: "Band synthesis:",
+    infoAppliedHead: "Realistic observation-chain parameters",
+    infoMirror: "Mirror aperture", infoExp: "Exposure per frame", infoFrames: "frames",
+    infoPixScale: "Detector pixel scale", infoNeSrc: "Unlensed source total electrons",
+    infoBkg: "Background level", infoStretch: "Display stretch",
+    langBtnEN: "EN", langBtnZH: "中文"
+  }
+};
+function T(k) { return (TXT[LANG] && TXT[LANG][k]) !== undefined ? TXT[LANG][k] : TXT.zh[k] ?? k; }
+/* 望远镜显示名: 带 full 字段的仪器(如 CSST)按当前语言拼全称, 其余原样 */
+function telName(I) { return I.full ? `${I.name} (${T(I.full)})` : I.name; }
+
+/* 应用语言到全部静态节点 (data-i18n=textContent / data-i18n-html=innerHTML / data-i18n-title=title 属性) */
+function applyLang(lang) {
+  LANG = lang;
+  localStorage.setItem("lensLang", lang);
+  document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = T(el.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-html]").forEach(el => { el.innerHTML = T(el.dataset.i18nHtml); });
+  document.querySelectorAll("[data-i18n-title]").forEach(el => { el.title = T(el.dataset.i18nTitle); });
+  /* 望远镜下拉的 option 文本由 telName 动态拼接, 切语言时需重建 (保持当前选中项) */
+  const sel = document.getElementById("telescope");
+  if (sel) {
+    const cur = sel.value;
+    sel.innerHTML = Object.keys(INSTR).map(k => `<option value="${k}">${telName(INSTR[k])}</option>`).join("");
+    sel.value = cur;
+  }
+  // 语言开关高亮态
+  const be = document.getElementById("langEN"), bz = document.getElementById("langZH");
+  if (be && bz) {
+    be.classList.toggle("lang-on", lang === "en");
+    bz.classList.toggle("lang-on", lang === "zh");
+  }
+  updateAll(); // 刷新全部动态文案 (Mock 状态/悬停卡/光路图)
+}
 
 /* =====================================================================
  * 物理模型常数与参数
@@ -765,7 +856,7 @@ const PSF_B64 = {
   "HSC/z": { n: 19, d: "ZAU8Bk0IxggbCi0LOQzXDCgN6wzYDMwMAAzZC3sKzQjzB1oGMQWNBhIIHApfCk0MTg1UDoIPJxAREKAPLw9mDqMNbwxBC3UJ8QcYB2cItAn9CXgM0Q20D80Q2hGcEvYSwhIiEuAQBBCUDogMlwpxCQsIiQmhCmoMKg5iEOcR+BMJFb4V/BXQFRQVBxQIEpkQZQ5vDOEKzQjHCmwM/g0/EIIS0RT4FrUYqBn5GYwZgRjMFrkUxxKuEGEOGwx+Cg4MoA3LDwIS8RQPGG0aqBwHHnce0x1wHPcZkRfbFEES+Q9vDJQLbgxRDv8QHRRNF5Iayh2jIE8i4CLpISQgDh3IGcoW4hPvEP8NTQsaDasP5REoFecY3xy7IBok4iV3JlMl8SK3HxscaRjpFAQSNA/oC60N5g+BEvQV2BkmHlwi0iVJKKsoeiejJO0g8BwfGYEVfBKuD0MMwA02ELcSChbcGTIeZyLbJUQopChlJ50k9SD1HD0ZmRVcEjAQ1wyhDRkQgxJjFQ0ZAx3LIB8kzCVPJjUl5yLkHzIciRgbFSYSsw+6DPYMCw9xEYEUsRfpGuEdpiA3Iq8i1yExIEAdHhoQFyUUKBGmDnYMYww/DkYQ5xKJFXAY4BrhHCoepx74HakcUhogGB0VShIOEF8NpwsSDCsN3A4+EdoThxUCGEMZLBqmGiMaCRlwFxoV2BLxELYOnQzkCvAKTQyZDd4PPxEoE7YU/hWiFhIXpxahFYEUgxLNEE4PtQwGDLkKjggEC08MHg1FD7QQ/hEUE6oTDxTEE7oSdRFQEL0O6Qx1CzEKdwh0B0EJBQqiC/4M6g3xD2QQwBDhEL4QNhAYDyIO4wxxC/0JkgjDBiIH6Qc2CJEJGgs/DAgNxw3fDX4O3w1ODZEMbgwxC9cI/AcqBn8FvATFBrQHwAdZCSMK2goCDFUMHQwmDEQLsgkSCRsJ1gc2BzQFDAQ=" },
 };
 const CAL = {"CSST/g": {"lam": 4804.4, "Q": 0.185596}, "CSST/r": {"lam": 6190.2, "Q": 0.149427}, "CSST/z": {"lam": 9032.7, "Q": 0.0698987}, "HST/UV_F275W": {"lam": 2714.3, "Q": 0.0185643}, "HST/UV_F390W": {"lam": 3934.4, "Q": 0.0568796}, "HST/UV_F814W": {"lam": 8068.0, "Q": 0.0453128}, "JWST/F070W": {"lam": 7060.3, "Q": 0.054654}, "JWST/F150W": {"lam": 15045.7, "Q": 0.10393}, "JWST/F200W": {"lam": 19922.4, "Q": 0.122304}, "Euclid/Y": {"lam": 10812.4, "Q": 0.189359}, "Euclid/J": {"lam": 13669.5, "Q": 0.232676}, "Euclid/H": {"lam": 17707.9, "Q": 0.221884}, "Roman/F087": {"lam": 8719.1, "Q": 0.663456}, "Roman/F129": {"lam": 12936.0, "Q": 0.711075}, "Roman/F158": {"lam": 15791.1, "Q": 0.734048}, "HSC/g": {"lam": 4809.0, "Q": 0.125344}, "HSC/r": {"lam": 6229.1, "Q": 0.120707}, "HSC/z": {"lam": 8906.2, "Q": 0.0406593}};
-const INSTR = {"CSST": {"name": "CSST (巡天空间望远镜)", "A": 2.0, "t": 150.0, "pix": 0.074, "psf": "file", "Nexp": [2.0, 2.0, 2.0], "sky": [0.2803, 0.3591, 0.2168], "dark": [0.02, 0.02, 0.02], "read": [5.0, 5.0, 5.0]}, "HST": {"name": "HST (ACS/WFC3)", "A": 2.4, "t": 600.0, "pix": 0.04, "psf": "file", "Nexp": [1.0, 1.0, 1.0], "sky": [0.0004, 0.0181, 0.0562], "dark": [0.0008, 0.0008, 0.0008], "read": [3.1, 3.1, 3.1]}, "JWST": {"name": "JWST (NIRCam)", "A": 6.5, "t": 600.0, "pix": 0.031, "psf": "file", "Nexp": [1.0, 1.0, 1.0], "sky": [0.3307, 0.4721, 0.4326], "dark": [0.0019, 0.0019, 0.0019], "read": [15.77, 15.77, 15.77]}, "Euclid": {"name": "Euclid (VIS/NISP)", "A": 1.2, "t": 600.0, "pix": 0.3, "psf": "gaussian", "Nexp": [1.0, 1.0, 1.0], "sky": [3.6863, 4.4556, 3.8228], "dark": [0.02, 0.02, 0.02], "read": [6.0, 6.0, 6.0], "fwhm": [0.493, 0.515, 0.553]}, "Roman": {"name": "Roman (WFIRST)", "A": 2.36, "t": 600.0, "pix": 0.11, "psf": "file", "Nexp": [1.0, 1.0, 1.0], "sky": [6.6275, 7.1373, 7.0349], "dark": [0.1, 0.1, 0.1], "read": [20.0, 20.0, 20.0]}, "HSC": {"name": "HSC (Subaru Hyper Suprime-Cam)", "A": 8.5, "t": 600.0, "pix": 0.168, "psf": "file", "Nexp": [1.0, 1.0, 1.0], "sky": [49.983, 79.8137, 107.205], "dark": [0.0, 0.0, 0.0], "read": [4.5, 4.5, 4.5]}};
+const INSTR = {"CSST": {"name": "CSST", "full": "csstFull", "A": 2.0, "t": 150.0, "pix": 0.074, "psf": "file", "Nexp": [2.0, 2.0, 2.0], "sky": [0.2803, 0.3591, 0.2168], "dark": [0.02, 0.02, 0.02], "read": [5.0, 5.0, 5.0]}, "HST": {"name": "HST (ACS/WFC3)", "A": 2.4, "t": 600.0, "pix": 0.04, "psf": "file", "Nexp": [1.0, 1.0, 1.0], "sky": [0.0004, 0.0181, 0.0562], "dark": [0.0008, 0.0008, 0.0008], "read": [3.1, 3.1, 3.1]}, "JWST": {"name": "JWST (NIRCam)", "A": 6.5, "t": 600.0, "pix": 0.031, "psf": "file", "Nexp": [1.0, 1.0, 1.0], "sky": [0.3307, 0.4721, 0.4326], "dark": [0.0019, 0.0019, 0.0019], "read": [15.77, 15.77, 15.77]}, "Euclid": {"name": "Euclid (VIS/NISP)", "A": 1.2, "t": 600.0, "pix": 0.3, "psf": "gaussian", "Nexp": [1.0, 1.0, 1.0], "sky": [3.6863, 4.4556, 3.8228], "dark": [0.02, 0.02, 0.02], "read": [6.0, 6.0, 6.0], "fwhm": [0.493, 0.515, 0.553]}, "Roman": {"name": "Roman (WFIRST)", "A": 2.36, "t": 600.0, "pix": 0.11, "psf": "file", "Nexp": [1.0, 1.0, 1.0], "sky": [6.6275, 7.1373, 7.0349], "dark": [0.1, 0.1, 0.1], "read": [20.0, 20.0, 20.0]}, "HSC": {"name": "HSC (Subaru Hyper Suprime-Cam)", "A": 8.5, "t": 600.0, "pix": 0.168, "psf": "file", "Nexp": [1.0, 1.0, 1.0], "sky": [49.983, 79.8137, 107.205], "dark": [0.0, 0.0, 0.0], "read": [4.5, 4.5, 4.5]}};
 const LIMIT = { limitMag: 24, limitSNR: 5, limitAperture: 2.0 };
 
 function halfToFloat(h) {
@@ -877,35 +968,40 @@ function sersicBn(n) {
   return 2 * n - 1 / 3 + 4 / (405 * n) + 46 / (25515 * n * n);
 }
 
-let _llShape = { key: null, arr: null, sum: 0 };
+let _llShape = { key: null, arr: null };
 function lensLightGrid(n) {
   const out = new Float32Array(n * n);
   if (!P.llight) return out;
-  const d = FIELD / n, d2 = d * d;
+  const d = FIELD / n;
   const kShape = [n, P.lell, P.lang, P.lx, P.ly, P.re, P.sersic].join(",");
-  let shape, sum;
+  let shape, smax;
   if (_llShape.key === kShape) {
-    shape = _llShape.arr; sum = _llShape.sum;
+    shape = _llShape.arr; smax = _llShape.max;
   } else {
-    shape = new Float32Array(n * n);
+    shape = new Float32Array(n * n); smax = 0;
     const c = Math.cos(P.lang), s = Math.sin(P.lang);
     const q = P.lell, re = Math.max(1e-3, P.re), bn = sersicBn(P.sersic);
-    sum = 0;
     for (let j = 0; j < n; j++) {
       const ty = (j - n / 2 + 0.5) * d, row = j * n;
       for (let i = 0; i < n; i++) {
         const dx = (i - n / 2 + 0.5) * d - P.lx, dy = ty - P.ly;
         const xp = dx * c + dy * s, yp = -dx * s + dy * c;
         const rq = Math.sqrt(q * q * xp * xp + yp * yp);
-        const v = Math.exp(-bn * (Math.pow(rq / re, 1 / P.sersic) - 1));
-        shape[row + i] = v; sum += v;
+        // 形状归一到解析峰值 1: I(r)/I(0) = exp(-bn·(r/re)^(1/n)); 离散网格峰值另存 smax
+        const v = Math.exp(-bn * Math.pow(rq / re, 1 / P.sersic));
+        shape[row + i] = v;
+        if (v > smax) smax = v;
       }
     }
-    _llShape = { key: kShape, arr: shape, sum };
+    _llShape = { key: kShape, arr: shape, max: smax };
   }
-  const S_src = SRC_PEAK * 2 * Math.PI * P.ssize * P.ssize * P.sell;
-  const target = S_src * Math.pow(10, -0.4 * (P.lmab - P.mab));
-  const scale = sum > 0 ? (target / d2) / sum : 0;
+  // 亮度归一 (2026-10-14 修订): 网格峰值面亮度对齐 —
+  // 透镜光最亮像素面亮度 = SRC_PEAK·10^(−0.4(lmab−mab)), 与源中心面亮度共用同一基准。
+  // 旧实现按总流量归一 (target=S_src·10^(−0.4Δm)), 同星等下延展 Sérsic 轮廓中心面亮度
+  // 比小尺寸高斯源暗数十倍 (浓度效应), 观感亮度严重失衡; 改后 mab=lmab 时两者最亮像素同亮。
+  // 除以 smax (网格实际最大值) 而非解析峰值 1: Sérsic n 大时中心极陡,
+  // 离散采样点偏离中心半像素峰值即跌一个量级, 对齐网格峰值才能保证视觉一致且对采样相位鲁棒。
+  const scale = SRC_PEAK * Math.pow(10, -0.4 * (P.lmab - P.mab)) / (smax > 0 ? smax : 1);
   for (let i = 0; i < out.length; i++) out[i] = shape[i] * scale;
   return out;
 }
@@ -1084,7 +1180,7 @@ function drawHalfLightContour(ctx, img, color) {
 
   ctx.save();
   canvasScale(ctx);
-  ctx.strokeStyle = color; ctx.lineWidth = 0.8; ctx.setLineDash([4, 3]);
+  ctx.strokeStyle = color; ctx.lineWidth = 0.8;
   ctx.beginPath();
   for (let j = 0; j < n - step; j += step) {
     const jm = j + step;
@@ -1117,58 +1213,75 @@ function drawHalfLightContour(ctx, img, color) {
 
 const _srcGrid = { key: null, img: new Float32Array(RENDER * RENDER) };
 
-function drawSourcePlane() {
+function drawSourcePlane(caus) {
   const ctx = document.getElementById("srcCanvas").getContext("2d");
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.fillStyle = "#000"; ctx.fillRect(0, 0, 600, 600);
 
-  const kSrc = ["sx", "sy", "ssize", "sell", "sang"].map(k => k + "=" + P[k]).join(",");
-  if (_srcGrid.key !== kSrc) {
-    for (let j = 0; j < RENDER; j++) {
-      const by = (j - RENDER/2 + 0.5) * PIX;
-      for (let i = 0; i < RENDER; i++) {
-        const bx = (i - RENDER/2 + 0.5) * PIX;
-        _srcGrid.img[j*RENDER + i] = sourceIntensity(bx, by);
+  // 显示内容二选一: light=源光亮度图 / contour=仅半光半径等高线 (与透镜平面联动)
+  const viewMode = document.getElementById("srcView").value;
+
+  if (viewMode === "light") {
+    const kSrc = ["sx", "sy", "ssize", "sell", "sang"].map(k => k + "=" + P[k]).join(",");
+    if (_srcGrid.key !== kSrc) {
+      for (let j = 0; j < RENDER; j++) {
+        const by = (j - RENDER/2 + 0.5) * PIX;
+        for (let i = 0; i < RENDER; i++) {
+          const bx = (i - RENDER/2 + 0.5) * PIX;
+          _srcGrid.img[j*RENDER + i] = sourceIntensity(bx, by);
+        }
       }
+      _srcGrid.key = kSrc;
     }
-    _srcGrid.key = kSrc;
+    blitImage(ctx, _srcGrid.img, 1);
   }
-  blitImage(ctx, _srcGrid.img, 1);
 
   // 松散标尺网格 (blitImage 为不透明覆盖, 必须在其之后绘制)
   drawAxes(ctx);
 
-  // 源半光等高线
-  const rh = P.ssize * Math.sqrt(2 * Math.LN2);
-  ctx.save(); canvasScale(ctx);
-  ctx.strokeStyle = "rgba(56, 225, 255, 0.9)"; ctx.lineWidth = 1.0; ctx.setLineDash([5, 4]);
-  ctx.beginPath();
-  ctx.ellipse(a2p(P.sx), a2p(P.sy), rh / PIX * (1), rh / PIX * P.sell, P.sang, 0, 2 * Math.PI);
-  ctx.stroke(); 
+  // 焦散线 (绿色实线, 焦散线本是源平面 β 坐标上的曲线)
+  if (caus && caus.length > 2) {
+    ctx.save(); canvasScale(ctx);
+    ctx.strokeStyle = "#34d399"; ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(a2p(caus[0][0]), a2p(caus[0][1]));
+    for (const [bx, by] of caus) ctx.lineTo(a2p(bx), a2p(by));
+    ctx.closePath(); ctx.stroke();
+    ctx.restore();
+  }
 
-  // 源中心小靶心
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.9)";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.arc(a2p(P.sx), a2p(P.sy), 4, 0, 2 * Math.PI);
-  ctx.stroke();
+  ctx.save(); canvasScale(ctx);
+
+  // 半光等高线仅 contour 模式显示 (light 模式下源光本身即形状信息)
+  if (viewMode === "contour") {
+    const rh = P.ssize * Math.sqrt(2 * Math.LN2);
+    ctx.strokeStyle = "rgba(56, 225, 255, 0.9)"; ctx.lineWidth = 1.0;
+    ctx.beginPath();
+    ctx.ellipse(a2p(P.sx), a2p(P.sy), rh / PIX * (1), rh / PIX * P.sell, P.sang, 0, 2 * Math.PI);
+    ctx.stroke();
+  }
   ctx.restore();
 
   // 更新 HUD 坐标
   document.getElementById("srcCoordReadout").textContent = `(${P.sx.toFixed(2)}″, ${P.sy.toFixed(2)}″)`;
 }
 
-function drawLensPlane(img, cc, caus, images) {
+function drawLensPlane(img, cc) {
   const ctx = document.getElementById("lensCanvas").getContext("2d");
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.fillStyle = "#000"; ctx.fillRect(0, 0, 600, 600);
 
-  blitImage(ctx, img, 1);
+  // 显示内容与源平面联动: light=像光亮度图 / contour=仅半光等高线
+  const viewMode = document.getElementById("srcView").value;
+
+  if (viewMode === "light") {
+    blitImage(ctx, img, 1);
+  }
 
   // 松散标尺网格 (blitImage 为不透明覆盖, 必须在其之后绘制)
   drawAxes(ctx);
 
-  // 1) 临界曲线 (红色实线)
+  // 1) 临界曲线 (红色实线, 恒显示 — 透镜平面本征结构)
   if (cc && cc.length > 2) {
     ctx.save(); canvasScale(ctx);
     ctx.strokeStyle = "#ff5454"; ctx.lineWidth = 1.4;
@@ -1179,40 +1292,10 @@ function drawLensPlane(img, cc, caus, images) {
     ctx.restore();
   }
 
-  // 2) 焦散线 (紫色实线)
-  if (caus && caus.length > 2) {
-    ctx.save(); canvasScale(ctx);
-    ctx.strokeStyle = "#d966ff"; ctx.lineWidth = 1.2;
-    ctx.beginPath();
-    ctx.moveTo(a2p(caus[0][0]), a2p(caus[0][1]));
-    for (const [bx, by] of caus) ctx.lineTo(a2p(bx), a2p(by));
-    ctx.closePath(); ctx.stroke();
-    ctx.restore();
+  // 2) 像的半光半径等高线仅 contour 模式显示
+  if (viewMode === "contour") {
+    drawHalfLightContour(ctx, img, "rgba(56, 225, 255, 0.85)");
   }
-
-  // 3) 像的半光半径等高线
-  drawHalfLightContour(ctx, img, "rgba(56, 225, 255, 0.85)");
-
-  // 4) 像位置标记与放大率标签
-  ctx.save(); canvasScale(ctx);
-  ctx.font = "bold 9px monospace";
-  for (let idx = 0; idx < images.length; idx++) {
-    const im = images[idx];
-    const x = a2p(im.x), y = a2p(im.y);
-    // 像外发光环
-    ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 1.2;
-    ctx.beginPath(); ctx.arc(x, y, 4.5, 0, 2 * Math.PI); ctx.stroke();
-    ctx.fillStyle = "rgba(99, 151, 255, 0.5)"; ctx.fill();
-
-    // 标签带半透明阴影背底
-    const txt = `I${idx+1} μ=${im.mu.toFixed(1)}`;
-    ctx.fillStyle = "rgba(10, 14, 25, 0.85)";
-    ctx.fillRect(x + 6, y - 11, txt.length * 6 + 4, 13);
-    ctx.fillStyle = "#ffffff";
-    ctx.fillText(txt, x + 8, y - 1);
-  }
-
-  ctx.restore();
 
   document.getElementById("lensCoordReadout").textContent = `(${P.lx.toFixed(2)}″, ${P.ly.toFixed(2)}″)`;
 }
@@ -1228,7 +1311,7 @@ function drawMock(img, applied) {
 
   const sv = document.getElementById("telescope").value;
   const I = INSTR[sv];
-  document.getElementById("hudMockName").textContent = I.name;
+  document.getElementById("hudMockName").textContent = telName(I);
 
   if (!applied) {
     const show = img.slice();
@@ -1238,18 +1321,19 @@ function drawMock(img, applied) {
     }
     blitImage(ctx, show, 1);
     document.getElementById("mockStatusBadge").className = "text-xs font-mono px-2 py-0.5 rounded bg-blue-500/10 text-blue-300 border border-blue-500/30";
-    document.getElementById("mockStatusBadge").textContent = "理想几何像";
-    document.getElementById("hudMockSNR").textContent = "SNR: ∞ (无噪)";
-    document.getElementById("mockStatus").innerHTML = `<b>当前模式: 理想无噪像</b> · 未叠加点扩散函数 (PSF) 卷积与传感器读出/背景散粒噪声。点击上方「应用仪器效应」查看该巡天望远镜的真实观测效果。`;
-    MOCK_INFO = `<h4>${I.name} · 理想像态</h4><div class="space-y-1 text-slate-300"><div>视场: ±10″ (边长 20″)</div><div>渲染分辨率: ${RENDER}×${RENDER}</div><div>透镜光: ${P.llight ? '已叠加 Sérsic 轮廓' : '已关闭'}</div></div>`;
+    document.getElementById("mockStatusBadge").textContent = T("badgeIdeal");
+    document.getElementById("hudMockSNR").textContent = T("snrNoNoise");
+    document.getElementById("mockStatus").innerHTML = T("statusIdeal");
+    MOCK_INFO = `<h4>${telName(I)} · ${T("infoIdealHead")}</h4><div class="space-y-1 text-slate-300"><div>${T("infoField")}: ±10″ (${T("infoFieldSide")})</div><div>${T("infoRes")}: ${RENDER}×${RENDER}</div><div>${T("infoLensLight")}: ${P.llight ? T("llOn") : T("llOff")}</div><div>${T("infoNoise")}</div><div>${T("infoUnit")}</div></div>`;
     return;
   }
 
   document.getElementById("mockStatusBadge").className = "text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/30";
-  document.getElementById("mockStatusBadge").textContent = "已应用巡天仪器链";
+  document.getElementById("mockStatusBadge").textContent = T("badgeApplied");
 
-  const noiseMode = document.getElementById("noiseMode").value;
-  const unit = document.getElementById("imgUnit").value;
+  // 噪声标定与显示单位已固定 (UI 下拉框已移除): 仪器参数 Poisson+读出 / electron
+  const noiseMode = "instrument";
+  const unit = "electron";
   const nMock = Math.max(64, Math.min(300, Math.round(FIELD / I.pix)));
   const rel = renderImageAt(nMock);
   const out = [0, 1, 2].map(bi => bandImage(sv, bi, rel, nMock, P.mab, noiseMode, unit));
@@ -1265,22 +1349,23 @@ function drawMock(img, applied) {
   const bands = BANDS[sv];
   document.getElementById("mockStatus").innerHTML = 
     `<div class="flex flex-wrap items-center justify-between gap-1 mb-1 font-mono text-slate-200">
-      <span>${I.name}</span>
-      <span class="text-emerald-400 font-bold">每像素 SNR ≈ ${snr.toFixed(1)}</span>
+      <span>${telName(I)}</span>
+      <span class="text-emerald-400 font-bold">${T("snrPerPix")} ${snr.toFixed(1)}</span>
     </div>
     <div class="text-[11px] text-slate-400">
-      像元尺度: <span class="text-slate-200 font-mono">${I.pix}″/px</span> · 口径: <span class="text-slate-200 font-mono">${I.A}m</span> · 
-      波段合成: <span class="text-blue-300 font-mono">B(${bands[0]})</span> <span class="text-emerald-300 font-mono">G(${bands[1]})</span> <span class="text-red-300 font-mono">R(${bands[2]})</span>
+      ${T("stPix")} <span class="text-slate-200 font-mono">${I.pix}″/px</span> · ${T("stAperture")} <span class="text-slate-200 font-mono">${I.A}m</span> · 
+      ${T("stBands")} <span class="text-blue-300 font-mono">B(${bands[0]})</span> <span class="text-emerald-300 font-mono">G(${bands[1]})</span> <span class="text-red-300 font-mono">R(${bands[2]})</span>
     </div>`;
 
   MOCK_INFO = 
-    `<h4 class="font-bold text-sm text-blue-300 mb-1.5">${I.name} 真实观测链参数</h4>
+    `<h4 class="font-bold text-sm text-blue-300 mb-1.5">${telName(I)} ${T("infoAppliedHead")}</h4>
      <div class="space-y-1 text-slate-300 text-[11px]">
-       <div>• 主镜口径: ${I.A} m · 单帧曝光: ${I.t} s × ${I.Nexp[0]} 帧</div>
-       <div>• 探测器像元尺度: ${I.pix}″/像素</div>
-       <div>• 目标源未透镜总电子数: ${out[1].Ne_src.toExponential(2)} e⁻</div>
-       <div>• 背景水平: ${out[1].B.toFixed(1)} e⁻/px (σ_bkg ≈ ${out[1].sigma.toFixed(2)})</div>
-       <div>• 显示拉伸: AsinhStretch (a=${STRETCH_A}) RGB 合成</div>
+       <div>• ${T("infoMirror")}: ${I.A} m · ${T("infoExp")}: ${I.t} s × ${I.Nexp[0]} ${T("infoFrames")}</div>
+       <div>• ${T("infoPixScale")}: ${I.pix}″/px</div>
+       <div>• ${T("infoNeSrc")}: ${out[1].Ne_src.toExponential(2)} e⁻</div>
+       <div>• ${T("infoBkg")}: ${out[1].B.toFixed(1)} e⁻/px (σ_bkg ≈ ${out[1].sigma.toFixed(2)})</div>
+       <div>• ${T("infoNoise")} · ${T("infoUnit")}</div>
+       <div>• ${T("infoStretch")}: AsinhStretch (a=${STRETCH_A}) ${T("rgbSynth")}</div>
      </div>`;
 }
 
@@ -1314,8 +1399,8 @@ function drawRayTracing(images) {
   ctx.beginPath(); ctx.ellipse(xS, ys, 14, 14 * Math.max(0.25, P.sell), -P.sang, 0, 2*Math.PI); ctx.fill();
   ctx.shadowColor = "#38e1ff"; ctx.shadowBlur = 10; ctx.fill(); ctx.shadowBlur = 0;
 
-  ctx.fillStyle = "#bae6fd"; ctx.font = "bold 16px sans-serif";
-  ctx.fillText("源平面 Source (zs)", xS - 50, ys - 24);
+  ctx.fillStyle = "#bae6fd"; ctx.font = "bold 18px sans-serif";
+  ctx.fillText(T("raySrcLabel") + " (zs)", xS - 50, ys - 24);
 
   // 透镜位置
   ctx.save();
@@ -1328,17 +1413,19 @@ function drawRayTracing(images) {
   ctx.fill(); ctx.stroke();
   ctx.restore();
 
-  ctx.fillStyle = "#ffb347"; ctx.font = "bold 15px sans-serif";
-  ctx.fillText("SIE 透镜 (zl)", xL - 45, yMid - P.tE * VSCALE - 14);
-  ctx.font = "12px monospace"; ctx.fillStyle = "#fcd34d";
-  ctx.fillText(`θE=${P.tE.toFixed(2)}″ q=${P.lell.toFixed(2)}`, xL - 55, yMid + P.tE * VSCALE + 22);
+  ctx.fillStyle = "#ffb347"; ctx.font = "bold 18px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText(T("rayLensLabel") + " (zl)", xL, yMid - P.tE * VSCALE - 14);
+  ctx.textAlign = "left";
 
   // 观测者 (Observer)
   ctx.strokeStyle = "#c7d2fe"; ctx.lineWidth = 2;
   ctx.beginPath(); ctx.arc(xO, yMid, 10, 0, 2 * Math.PI); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(xO, yMid); ctx.lineTo(xO + 24, yMid - 13); ctx.lineTo(xO + 24, yMid + 13); ctx.closePath(); ctx.stroke();
-  ctx.fillStyle = "#c7d2fe"; ctx.font = "bold 15px sans-serif";
-  ctx.fillText("观测者 (Observer)", xO - 50, yMid + 38);
+  ctx.fillStyle = "#c7d2fe"; ctx.font = "bold 18px sans-serif";
+  ctx.textAlign = "right";
+  ctx.fillText(T("rayObsLabel"), W - 20, yMid + 38);
+  ctx.textAlign = "left";
 
   // 光线追踪多像折线
   const cols = ["#34d399", "#fbbf24", "#f472b6", "#60a5fa"];
@@ -1358,26 +1445,21 @@ function drawRayTracing(images) {
     ctx.beginPath(); ctx.arc(xL, yLens, 4, 0, 2 * Math.PI); ctx.fill();
 
     // 像标注
-    ctx.font = "bold 12px monospace";
-    ctx.fillText(`像 I${idx + 1} (μ=${im.mu.toFixed(1)})`, xO - 150, yMid - 22 - idx * 22);
+    ctx.font = "bold 15px monospace";
+    ctx.fillText(`${T("imgLabel")} I${idx + 1} (μ=${im.mu.toFixed(1)})`, xO - 150, yMid - 22 - idx * 22);
   });
 
   // 未偏折直线光路 (虚线)
   ctx.strokeStyle = "rgba(255, 255, 255, 0.28)"; ctx.setLineDash([5, 5]); ctx.lineWidth = 1.2;
   ctx.beginPath(); ctx.moveTo(xS + 14, ys); ctx.lineTo(xO - 10, yMid); ctx.stroke();
   ctx.setLineDash([]);
-  ctx.fillStyle = "rgba(255, 255, 255, 0.5)"; ctx.font = "12px sans-serif";
-  ctx.fillText("未偏折直线光路 (无透镜)", (xS + xL) / 2 - 60, (ys + yMid) / 2 - 10);
+  ctx.fillStyle = "rgba(255, 255, 255, 0.68)"; ctx.font = "bold 15px sans-serif";
+  ctx.fillText(T("rayUndefl"), (xS + xL) / 2 - 60, (ys + yMid) / 2 - 10);
 
-  // 拓扑标注
-  const TOPO = {
-    1: "1 像 · 弱透镜区 (源在伪焦散线 cut 外)",
-    2: "2 像 · 经典双像 (源在切向焦散线与 cut 之间)",
-    3: "3 像 · 焦散线临界重折变",
-    4: "4 像 · 经典四像 (源在切向焦散线 astroid 内)"
-  };
-  ctx.fillStyle = "#cbd5e1"; ctx.font = "bold 14px monospace";
-  ctx.fillText(`当前几何像数目: ${images.length}  —  ${TOPO[images.length] || "数值计算中"}`, 30, 36);
+  // 拓扑标注 (文案走 i18n 字典, 源位置描述不再中英混杂)
+  const TOPO = { 1: T("topo1"), 2: T("topo2"), 3: T("topo3"), 4: T("topo4") };
+  ctx.fillStyle = "#cbd5e1"; ctx.font = "bold 17px monospace";
+  ctx.fillText(`${T("topoCount")} ${images.length}  —  ${TOPO[images.length] || T("topoCalc")}`, 30, 40);
 }
 
 /* =====================================================================
@@ -1406,32 +1488,10 @@ function updateAll() {
     _memo.kSolve = kSolve;
   }
 
-  drawSourcePlane();
-  drawLensPlane(_memo.img, _memo.cc, _memo.caus, _memo.images);
+  drawSourcePlane(_memo.caus);
+  drawLensPlane(_memo.img, _memo.cc);
   drawMock(_memo.img, mockApplied);
   drawRayTracing(_memo.images);
-
-  // 刷新顶部 HUD 统计
-  updateTopHUD(_memo.images);
-}
-
-function updateTopHUD(images) {
-  const n = images.length;
-  const numElem = document.getElementById("stat_numImages");
-  if (n === 4) numElem.textContent = "4 像 · 焦散线内部 (Quad)";
-  else if (n === 2) numElem.textContent = "2 像 · 焦散线外部 (Double)";
-  else if (n === 1) numElem.textContent = "1 像 · 弱透镜区 (Single)";
-  else numElem.textContent = `${n} 像 · 临界重折变中`;
-
-  let maxMu = 0;
-  for (const im of images) if (im.mu > maxMu) maxMu = im.mu;
-  document.getElementById("stat_maxMu").textContent = `μ = ${maxMu.toFixed(1)}`;
-  document.getElementById("stat_tE").textContent = `${P.tE.toFixed(2)}″`;
-  document.getElementById("stat_ell").textContent = `q=${P.lell.toFixed(2)} (e=${(1 - P.lell).toFixed(2)})`;
-
-  const sv = document.getElementById("telescope").value;
-  document.getElementById("stat_tel").textContent = INSTR[sv].name.split(" ")[0];
-  document.getElementById("stat_pix").textContent = `${INSTR[sv].pix}″/px`;
 }
 
 let _rafPending = false;
@@ -1466,16 +1526,15 @@ for (const k of ids) {
 
 /* 望远镜初始化 */
 const selTel = document.getElementById("telescope");
-selTel.innerHTML = Object.keys(INSTR).map(k => `<option value="${k}">${INSTR[k].name}</option>`).join("");
+selTel.innerHTML = Object.keys(INSTR).map(k => `<option value="${k}">${telName(INSTR[k])}</option>`).join("");
 selTel.value = "CSST";
 
 document.getElementById("applyMock").addEventListener("click", () => { mockApplied = true; updateAll(); });
 document.getElementById("clearMock").addEventListener("click", () => { mockApplied = false; updateAll(); });
 document.getElementById("llight").addEventListener("change", () => { updateAll(); });
 selTel.addEventListener("change", () => { updateAll(); });
-["noiseMode", "imgUnit"].forEach(id => {
-  document.getElementById(id).addEventListener("change", () => { if (mockApplied) updateAll(); });
-});
+// 显示内容切换 (源光 / 半光等高线): 源平面与透镜平面联动重绘
+document.getElementById("srcView").addEventListener("change", () => { updateAll(); });
 
 /* =====================================================================
  * 画布交互：直接点击拖拽移动 源 或 透镜
@@ -1602,8 +1661,8 @@ function moveTip(ev) {
 
 attachTip(document.getElementById("mockCanvas"), () => MOCK_INFO);
 
-// 初始化渲染
-updateAll();
+// 初始化渲染 (applyLang 内部会调用 updateAll, 并按 localStorage 记忆的语言刷新全部文案)
+applyLang(LANG);
 </script>
 </body>
 </html>
