@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gravitational Lensing Playground — 星系透镜探险小游戏</title>
+<title data-i18n="title">星系透镜探索小游戏</title>
 <!-- Tailwind CSS CDN -->
 <script src="https://cdn.tailwindcss.com"></script>
 <!-- Variable 字体: 与仿真实验室页统一 -->
@@ -188,9 +188,16 @@
 
   /* ===== 通关弹窗金色光晕 ===== */
   #victoryModal .game-card { box-shadow: 0 0 60px -12px rgba(251, 191, 36, 0.35), 0 30px 80px -20px rgba(0, 0, 0, 0.9); }
+
+  /* ===== 语言开关: 当前语言高亮态 (与仿真实验室页统一) ===== */
+  #langZH, #langEN { transition: background 0.2s, color 0.2s; }
+  .lang-on { background: linear-gradient(135deg, #0284c7, #4f46e5) !important; color: #fff !important; }
 </style>
 </head>
 <body class="bg-cyber-950 text-slate-100 min-h-screen selection:bg-cyber-accent selection:text-black flex flex-col font-sans overflow-x-hidden relative text-base">
+<!-- 平台账号接入: 协议层与配置需在主脚本前加载 -->
+<script src="./config.js"></script>
+<script src="./cs-client.js"></script>
 
 <!-- 深空氛围背景层 (星云辉光 + 星点 + 噪点, 不参与交互) -->
 <div class="bg-atmosphere" aria-hidden="true"></div>
@@ -203,15 +210,15 @@
     <div class="flex items-center gap-3.5">
       <a href="strong-lensing.html" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-cyber-850 hover:bg-cyber-800 border border-cyber-700 text-sm text-cyber-accent font-medium transition hover:border-cyber-accent/60 shadow-sm">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-        <span>返回仿真实验室</span>
+        <span data-i18n="backLab">返回仿真实验室</span>
       </a>
       <div class="h-6 w-px bg-cyber-700/60 hidden sm:block"></div>
       <div class="logo-ring" title="Cosmic Lensing Quest"></div>
       <div class="flex items-center gap-2.5">
-        <h1 class="text-lg sm:text-xl font-bold bg-gradient-to-r from-sky-200 via-indigo-100 to-purple-300 bg-clip-text text-transparent">
-          星系透镜探险小游戏 · Cosmic Lensing Quest
+        <h1 class="text-lg sm:text-xl font-bold bg-gradient-to-r from-sky-200 via-indigo-100 to-purple-300 bg-clip-text text-transparent" data-i18n="title">
+          星系透镜探索小游戏
         </h1>
-        <span class="hidden md:inline-flex px-2.5 py-0.5 text-xs font-semibold rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20">3关挑战</span>
+        <span class="hidden md:inline-flex px-2.5 py-0.5 text-xs font-semibold rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20" data-i18n="challengeBadge">3关挑战</span>
       </div>
     </div>
 
@@ -219,34 +226,46 @@
     <div class="flex items-center gap-3.5">
       <!-- 三颗星收集进度 -->
       <div class="flex items-center gap-2.5 bg-cyber-900/90 border border-cyber-700 px-4 py-2 rounded-full shadow-inner">
-        <span class="text-sm text-slate-300 font-medium mr-1 hidden sm:inline">关卡星级:</span>
+        <span class="text-sm text-slate-300 font-medium mr-1 hidden sm:inline" data-i18n="stageStarsLabel">关卡星级:</span>
         <div class="flex items-center gap-2">
           <!-- 星星 1 -->
-          <span id="starSlot1" class="transition-all duration-300" title="关卡 1: 宇宙深场">
+          <span id="starSlot1" class="transition-all duration-300" title="关卡 1: 宇宙深场" data-i18n-title="starTip1">
             <svg class="w-6 h-6 text-slate-600 fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
           </span>
           <!-- 星星 2 -->
-          <span id="starSlot2" class="transition-all duration-300" title="关卡 2: 星际风景">
+          <span id="starSlot2" class="transition-all duration-300" title="关卡 2: 自然风景" data-i18n-title="starTip2">
             <svg class="w-6 h-6 text-slate-600 fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
           </span>
           <!-- 星星 3 -->
-          <span id="starSlot3" class="transition-all duration-300" title="关卡 3: 引力自拍">
+          <span id="starSlot3" class="transition-all duration-300" title="关卡 3: 引力自拍" data-i18n-title="starTip3">
             <svg class="w-6 h-6 text-slate-600 fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
           </span>
         </div>
         <span id="starCounterText" class="text-sm font-mono font-bold text-cyber-gold ml-1">0/3</span>
       </div>
 
+      <!-- 平台账号登录状态 (NADC Citizen Science): 未登录点击跳落地页, 已登录显示用户名 -->
+      <a id="csBadge" href="index.html" class="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-cyber-850 border border-cyber-700 text-xs font-medium text-slate-400 hover:text-white hover:border-sky-500 transition whitespace-nowrap" title="平台账号登录状态, 点击前往登录页">
+        <span id="csBadgeDot" class="w-2 h-2 rounded-full bg-slate-500 inline-block"></span>
+        <span id="csBadgeText">未登录</span>
+      </a>
+
       <!-- 音效开关 -->
-      <button id="soundToggle" onclick="toggleAudio()" class="p-2.5 rounded-xl bg-cyber-850 hover:bg-cyber-800 border border-cyber-700 text-slate-300 hover:text-white transition" title="开启/静音音效">
+      <button id="soundToggle" onclick="toggleAudio()" class="p-2.5 rounded-xl bg-cyber-850 hover:bg-cyber-800 border border-cyber-700 text-slate-300 hover:text-white transition" title="开启/静音音效" data-i18n-title="soundTip">
         <svg id="soundIconOn" class="w-5 h-5 text-cyber-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
         <svg id="soundIconOff" class="w-5 h-5 text-slate-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/></svg>
       </button>
 
       <!-- 重置游戏进度 -->
-    <button onclick="resetGameProgress()" class="p-2.5 rounded-xl bg-cyber-850 hover:bg-cyber-800 border border-cyber-700 text-slate-400 hover:text-red-400 transition" title="重置全部星级与任务">
+    <button onclick="resetGameProgress()" class="p-2.5 rounded-xl bg-cyber-850 hover:bg-cyber-800 border border-cyber-700 text-slate-400 hover:text-red-400 transition" title="重置全部星级与任务" data-i18n-title="resetProgressTip">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
     </button>
+
+      <!-- 中英双语一键切换 (记忆于 localStorage, 键名与仿真实验室页联动) -->
+      <div class="flex items-center rounded-lg overflow-hidden border border-cyber-700 text-xs font-semibold" role="group" aria-label="Language switch">
+        <button id="langZH" class="lang-on px-2.5 py-1.5 bg-cyber-800 text-slate-200">中文</button>
+        <button id="langEN" class="px-2.5 py-1.5 bg-cyber-850 text-slate-400 hover:text-slate-100">EN</button>
+      </div>
   </div>
 
 </div>
@@ -264,20 +283,19 @@
           </div>
           <div>
             <div class="text-xs font-semibold text-sky-400 flex items-center gap-2">
-              <span>第一关 · 宇宙深场</span>
-              <span id="badgeStage1" class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">未通关</span>
+              <span data-i18n="stage1Name">第一关 · 宇宙深场</span>
+              <span id="badgeStage1" class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700" data-i18n="badgeTodo">未通关</span>
             </div>
-            <h2 class="text-base font-bold text-slate-100 mt-0.5">深空探索 · 极深星系群</h2>
+            <h2 class="text-base font-bold text-slate-100 mt-0.5" data-i18n="stage1Sub">深空探索 · 极深星系群</h2>
           </div>
         </div>
         <div id="starIcon1" class="text-slate-600 transition-all duration-300">
           <svg class="w-7 h-7 fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
         </div>
       </div>
-      <p class="text-xs text-slate-400 mt-2 line-clamp-1">默认哈勃极深场，寻找中央星系拖拽扭曲并导出下载</p>
     </div>
 
-    <!-- 关卡 2: 星际风景 -->
+    <!-- 关卡 2: 自然风景 -->
     <div id="stageCard2" onclick="switchStage(2)" class="game-card lift reveal reveal-2 rounded-2xl p-4 cursor-pointer transition-all duration-200 border-l-4 border-l-purple-500 opacity-80 hover:opacity-100 relative overflow-hidden group">
       <div class="flex items-start justify-between">
         <div class="flex items-center gap-3">
@@ -286,17 +304,16 @@
           </div>
           <div>
             <div class="text-xs font-semibold text-purple-400 flex items-center gap-2">
-              <span>第二关 · 星际风景</span>
-              <span id="badgeStage2" class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">未通关</span>
+              <span data-i18n="stage2Name">第二关 · 自然风景</span>
+              <span id="badgeStage2" class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700" data-i18n="badgeTodo">未通关</span>
             </div>
-            <h2 class="text-base font-bold text-slate-100 mt-0.5">雪山地平线 · 空间虫洞</h2>
+            <h2 class="text-base font-bold text-slate-100 mt-0.5" data-i18n="stage2Sub">雪山地平线 · 空间虫洞</h2>
           </div>
         </div>
         <div id="starIcon2" class="text-slate-600 transition-all duration-300">
           <svg class="w-7 h-7 fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
         </div>
       </div>
-      <p class="text-xs text-slate-400 mt-2 line-clamp-1">默认雪山风光，拖拽透镜制造折叠弯曲的地表地平线并导出</p>
     </div>
 
     <!-- 关卡 3: 引力自拍火柴人 -->
@@ -308,17 +325,16 @@
           </div>
           <div>
             <div class="text-xs font-semibold text-amber-400 flex items-center gap-2">
-              <span>第三关 · 引力自拍</span>
-              <span id="badgeStage3" class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">未通关</span>
+              <span data-i18n="stage3Name">第三关 · 引力自拍</span>
+              <span id="badgeStage3" class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700" data-i18n="badgeTodo">未通关</span>
             </div>
-            <h2 class="text-base font-bold text-slate-100 mt-0.5">火柴人自拍 · 哈哈镜外星人</h2>
+            <h2 class="text-base font-bold text-slate-100 mt-0.5" data-i18n="stage3Sub">火柴人自拍 · 哈哈镜外星人</h2>
           </div>
         </div>
         <div id="starIcon3" class="text-slate-600 transition-all duration-300">
           <svg class="w-7 h-7 fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
         </div>
       </div>
-      <p class="text-xs text-slate-400 mt-2 line-clamp-1">默认魔性大头火柴人，把透镜拖至面部制造外星人大头特效并导出</p>
   </div>
 </section>
 
@@ -337,7 +353,7 @@
         <div id="dragPromptBadge" class="absolute inset-0 pointer-events-none flex items-center justify-center bg-black/40 backdrop-blur-[2px] transition-opacity duration-300 rounded-2xl">
           <div class="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-cyber-900/95 border border-cyber-accent/60 text-sm text-cyber-accent font-medium shadow-2xl animate-pulse">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg>
-            <span>用鼠标按住并拖动以制造引力透镜效果</span>
+            <span data-i18n="dragPrompt">用鼠标按住并拖动以制造引力透镜效果</span>
           </div>
         </div>
 
@@ -354,7 +370,7 @@
       <div class="flex items-center gap-2 shrink-0">
         <button onclick="document.getElementById('fileUploadInput').click()" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-cyber-800 hover:bg-cyber-700 border border-cyber-600 text-slate-100 transition font-medium text-xs sm:text-sm shadow">
           <svg class="w-4 h-4 text-cyber-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-          <span>上传自定义图片</span>
+          <span data-i18n="uploadBtn">上传自定义图片</span>
         </button>
         <input type="file" id="fileUploadInput" accept="image/*" class="hidden">
       </div>
@@ -362,7 +378,7 @@
       <!-- 右侧：当前底图标签，右对齐，保证与左侧按钮互不挤压 -->
       <div class="flex items-center gap-2 min-w-0 text-right justify-end">
         <span class="w-2 h-2 rounded-full bg-cyber-accent shrink-0 hidden sm:inline-block"></span>
-        <span id="currentImgLabel" class="text-xs sm:text-sm text-slate-300 font-medium truncate max-w-[260px] sm:max-w-md" title="当前底图">
+        <span id="currentImgLabel" class="text-xs sm:text-sm text-slate-300 font-medium truncate max-w-[260px] sm:max-w-md" title="当前底图" data-i18n-title="curBaseImg">
           当前底图: 哈勃极深场 2014 (Hubble Ultra Deep Field 官方原图)
         </span>
       </div>
@@ -378,9 +394,9 @@
       <div class="flex items-center justify-between border-b border-cyber-700/60 pb-2">
         <h3 class="text-xs sm:text-sm font-bold text-cyber-accent uppercase tracking-wider flex items-center gap-2">
           <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
-          <span>透镜物理魔杖</span>
+          <span data-i18n="wandTitle">透镜物理魔杖</span>
         </h3>
-        <span class="text-[11px] text-slate-400 font-mono">SIE 椭球透镜</span>
+        <span class="text-[11px] text-slate-400 font-mono" data-i18n="sieBadge">SIE 椭球透镜</span>
       </div>
 
       <!-- 参数组 - 分散铺满容器，具有舒适呼吸感 -->
@@ -390,14 +406,14 @@
           <div class="flex justify-between items-center text-slate-200 text-xs sm:text-sm font-medium">
             <label class="flex items-center gap-1.5">
               <span class="w-2 h-2 rounded-full bg-cyber-accent"></span>
-              <span>爱因斯坦半径 (θ<sub>E</sub>)</span>
+              <span data-i18n-html="lensThetaE">爱因斯坦半径 (θ<sub>E</sub>)</span>
             </label>
             <output id="thetaE_val" class="font-mono text-cyber-accent font-bold text-sm sm:text-base">55 px</output>
           </div>
           <input type="range" id="thetaE_slider" min="15" max="150" step="1" value="55" class="my-0.5">
           <div class="flex justify-between text-[10px] sm:text-[11px] text-slate-400 font-mono">
-            <span>弱折射 (15 px)</span>
-            <span>巨大扭曲环 (150 px)</span>
+            <span>15 px</span>
+            <span>150 px</span>
           </div>
         </div>
 
@@ -406,14 +422,14 @@
           <div class="flex justify-between items-center text-slate-200 text-xs sm:text-sm font-medium">
             <label class="flex items-center gap-1.5">
               <span class="w-2 h-2 rounded-full bg-purple-400"></span>
-              <span>透镜质量轴比 (q)</span>
+              <span data-i18n="lensQ">透镜质量轴比 (q)</span>
             </label>
             <output id="ell_val" class="font-mono text-purple-300 font-bold text-sm sm:text-base">0.72</output>
           </div>
           <input type="range" id="ell_slider" min="0.15" max="1.0" step="0.01" value="0.72" class="my-0.5">
           <div class="flex justify-between text-[10px] sm:text-[11px] text-slate-400 font-mono">
-            <span>扁长椭球 (0.15)</span>
-            <span>正圆对称 (1.00)</span>
+            <span>0.15</span>
+            <span>1.00</span>
           </div>
         </div>
 
@@ -422,14 +438,14 @@
           <div class="flex justify-between items-center text-slate-200 text-xs sm:text-sm font-medium">
             <label class="flex items-center gap-1.5">
               <span class="w-2 h-2 rounded-full bg-pink-400"></span>
-              <span>透镜取向方位角 (PA)</span>
+              <span data-i18n="lensPA">透镜取向方位角 (PA)</span>
             </label>
             <output id="angle_val" class="font-mono text-pink-300 font-bold text-sm sm:text-base">35°</output>
           </div>
           <input type="range" id="angle_slider" min="0" max="180" step="1" value="35" class="my-0.5">
           <div class="flex justify-between text-[10px] sm:text-[11px] text-slate-400 font-mono">
-            <span>水平基准 (0°)</span>
-            <span>半周旋转 (180°)</span>
+            <span>0°</span>
+            <span>180°</span>
           </div>
         </div>
       </div>
@@ -437,12 +453,12 @@
       <!-- 快捷透镜形态与重置 -->
       <div class="flex flex-col gap-2 pt-2 border-t border-cyber-700/60 shrink-0">
         <div class="grid grid-cols-2 gap-2">
-          <button onclick="setLensPreset(40, 0.99, 0)" class="py-1.5 px-2.5 rounded-xl bg-cyber-800 hover:bg-cyber-700 border border-cyber-700 text-slate-200 transition text-xs font-medium">对称圆环</button>
-          <button onclick="setLensPreset(85, 0.45, 45)" class="py-1.5 px-2.5 rounded-xl bg-cyber-800 hover:bg-cyber-700 border border-cyber-700 text-slate-200 transition text-xs font-medium">拉伸长弧</button>
+          <button onclick="setLensPreset(40, 0.99, 0)" class="py-1.5 px-2.5 rounded-xl bg-cyber-800 hover:bg-cyber-700 border border-cyber-700 text-slate-200 transition text-xs font-medium" data-i18n="presetRing">对称圆环</button>
+          <button onclick="setLensPreset(85, 0.45, 45)" class="py-1.5 px-2.5 rounded-xl bg-cyber-800 hover:bg-cyber-700 border border-cyber-700 text-slate-200 transition text-xs font-medium" data-i18n="presetArc">拉伸长弧</button>
         </div>
         <button onclick="resetLensToFlat()" class="w-full py-1.5 px-2.5 rounded-xl bg-cyber-900 hover:bg-cyber-800 border border-cyber-700/70 text-slate-300 hover:text-slate-100 transition text-xs font-medium flex items-center justify-center gap-1.5">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-          <span>重置为无透镜原图</span>
+          <span data-i18n="resetFlat">重置为无透镜原图</span>
         </button>
       </div>
     </div>
@@ -451,16 +467,16 @@
     <div class="game-card rounded-3xl p-3.5 sm:p-4 flex flex-col gap-2 border border-cyber-700/80 shadow-2xl bg-gradient-to-b from-cyber-900/95 to-cyber-950 shrink-0">
       <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-cyber-gold">
         <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-        <span id="exportMissionTitle">通关目标: 导出透镜作品</span>
+        <span id="exportMissionTitle" data-i18n="missionTitle">通关目标: 导出透镜作品</span>
       </div>
-      <p id="exportMissionDesc" class="text-xs text-slate-300 leading-relaxed line-clamp-2">
+      <p id="exportMissionDesc" class="text-xs text-slate-300 leading-relaxed line-clamp-2" data-i18n="missionDesc">
         在画布上拖拽出引力透镜扭曲，点击下方按钮导出作品并点亮本关星星！
       </p>
 
       <!-- 导出并通关按钮 -->
       <button id="exportBtn" onclick="exportLensedImageAndEarnStar()" class="w-full py-2.5 sm:py-3 px-4 rounded-xl bg-gradient-to-r from-sky-500 via-indigo-600 to-purple-600 hover:from-sky-400 hover:to-purple-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-indigo-500/30 transition-all flex items-center justify-center gap-2 group active:scale-95">
         <svg class="w-4 h-4 text-cyber-gold group-hover:rotate-12 transition-transform" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-        <span id="exportBtnText">导出透镜作品 · 获得星星 ⭐</span>
+        <span id="exportBtnText" data-i18n="exportBtn">导出透镜作品 · 获得星星 ⭐</span>
       </button>
     </div>
 
@@ -475,11 +491,11 @@
     <div class="w-16 h-16 rounded-full bg-cyber-gold/20 border-2 border-cyber-gold flex items-center justify-center text-3xl shadow-lg shadow-cyber-gold/40 star-earned">
       🏆
     </div>
-    <h3 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-400">
+    <h3 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-400" data-i18n="victoryTitle">
       宇宙引力大师 · 全通关认证！
     </h3>
-    <p class="text-xs text-slate-300 leading-relaxed">
-      太棒了！您已成功征服全部 3 个关卡，分别掌握了宇宙深场环化、星际山川虫洞以及魔性火柴人大头变形！
+    <p class="text-xs text-slate-300 leading-relaxed" data-i18n="victoryDesc">
+      太棒了！您已成功征服全部 3 个关卡，分别掌握了宇宙深场环化、雪山湖泊虫洞以及魔性火柴人大头变形！
     </p>
     <div class="flex items-center justify-center gap-2 text-2xl my-1">
       <span class="text-cyber-gold">⭐</span>
@@ -487,10 +503,10 @@
       <span class="text-cyber-gold">⭐</span>
     </div>
     <div class="flex items-center gap-3 w-full mt-2">
-      <button onclick="document.getElementById('victoryModal').classList.add('hidden')" class="flex-1 py-2 px-4 rounded-xl bg-cyber-800 hover:bg-cyber-700 text-slate-200 text-xs font-semibold border border-cyber-700 transition">
+      <button onclick="document.getElementById('victoryModal').classList.add('hidden')" class="flex-1 py-2 px-4 rounded-xl bg-cyber-800 hover:bg-cyber-700 text-slate-200 text-xs font-semibold border border-cyber-700 transition" data-i18n="victoryFree">
         继续畅玩自由模式
       </button>
-      <a href="strong-lensing.html" class="flex-1 py-2 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-semibold shadow-md shadow-blue-500/30 text-center">
+      <a href="strong-lensing.html" class="flex-1 py-2 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-semibold shadow-md shadow-blue-500/30 text-center" data-i18n="victoryLab">
         深入物理实验室
       </a>
     </div>
@@ -498,6 +514,122 @@
 </div>
 <script>
 "use strict";
+
+/* =====================================================================
+ * 双语支持 (i18n): ZH/EN 一键切换, localStorage 记忆, 语言严格单语不混杂
+ * 存储键 "lensLang" 与 index.html / strong-lensing.html 联动记忆
+ * ===================================================================== */
+let LANG = localStorage.getItem("lensLang") || "zh";
+const TXT = {
+  zh: {
+    title: "星系透镜探索小游戏",
+    backLab: "返回仿真实验室",
+    challengeBadge: "3关挑战",
+    stageStarsLabel: "关卡星级:",
+    starTip1: "关卡 1: 宇宙深场", starTip2: "关卡 2: 自然风景", starTip3: "关卡 3: 引力自拍",
+    csBadgeTip: "平台账号登录状态, 点击前往登录页",
+    csNotLogged: "未登录", csLogged: "已登录", csLoggedTip: "已通过平台账号登录",
+    soundTip: "开启/静音音效",
+    resetProgressTip: "重置全部星级与任务",
+    stage1Name: "第一关 · 宇宙深场", stage1Sub: "深空探索 · 极深星系群",
+    stage2Name: "第二关 · 自然风景", stage2Sub: "雪山地平线 · 空间虫洞",
+    stage3Name: "第三关 · 引力自拍", stage3Sub: "火柴人自拍 · 哈哈镜外星人",
+    badgeTodo: "未通关", badgeDoing: "进行中", badgeDone: "已通关 ⭐",
+    dragPrompt: "用鼠标按住并拖动以制造引力透镜效果",
+    uploadBtn: "上传自定义图片", curBaseImg: "当前底图", customUploadPrefix: "自定义上传: ",
+    wandTitle: "透镜物理魔杖", sieBadge: "SIE 椭球透镜",
+    lensThetaE: "爱因斯坦半径 (θ<sub>E</sub>)",
+    lensQ: "透镜质量轴比 (q)",
+    lensPA: "透镜取向方位角 (PA)",
+    presetRing: "对称圆环", presetArc: "拉伸长弧", resetFlat: "重置为无透镜原图",
+    missionTitle: "通关目标: 导出透镜作品",
+    missionDesc: "在画布上拖拽出引力透镜扭曲，点击下方按钮导出作品并点亮本关星星！",
+    exportBtn: "导出透镜作品 · 获得星星 ⭐",
+    victoryTitle: "宇宙引力大师 · 全通关认证！",
+    victoryDesc: "太棒了！您已成功征服全部 3 个关卡，分别掌握了宇宙深场环化、雪山湖泊虫洞以及魔性火柴人大头变形！",
+    victoryFree: "继续畅玩自由模式", victoryLab: "深入物理实验室",
+    webglFail: "您的浏览器不支持 WebGL，请开启硬件加速或使用现代浏览器。",
+    stickmanTip: "用引力透镜拖我大头！👀",
+    wmStage: "⭐ 引力透镜探险 · 第 {n} 关打卡纪念",
+    csRecordTitle: "引力透镜探险 · 第 {n} 关通关",
+    csErr: "平台接口错误",
+    stage1CfgName: "第一关 · 深空星海", stage2CfgName: "第二关 · 自然风景", stage3CfgName: "第三关 · 引力自拍火柴人",
+    stage1Label: "当前底图: 哈勃极深场 2014 (Hubble Ultra Deep Field 官方原图)",
+    stage2Label: "当前底图: 雪山与湖泊自然风景",
+    stage3Label: "当前底图: 魔性火柴人大头人像"
+  },
+  en: {
+    title: "Galaxy Lens Quest",
+    backLab: "Back to Simulation Lab",
+    challengeBadge: "3-Stage Challenge",
+    stageStarsLabel: "Stage stars:",
+    starTip1: "Stage 1: Deep Field", starTip2: "Stage 2: Natural Scenery", starTip3: "Stage 3: Gravity Selfie",
+    csBadgeTip: "Platform account status, click to go to the sign-in page",
+    csNotLogged: "Sign in", csLogged: "Signed in", csLoggedTip: "Signed in with platform account",
+    soundTip: "Enable / mute sound",
+    resetProgressTip: "Reset all stars and missions",
+    stage1Name: "Stage 1 · Deep Field", stage1Sub: "Deep-space exploration · ultra-deep galaxy cluster",
+    stage2Name: "Stage 2 · Natural Scenery", stage2Sub: "Snowy horizon · space wormhole",
+    stage3Name: "Stage 3 · Gravity Selfie", stage3Sub: "Stickman selfie · funhouse-mirror alien",
+    badgeTodo: "Not cleared", badgeDoing: "In progress", badgeDone: "Cleared ⭐",
+    dragPrompt: "Press and drag with your mouse to create the gravitational lens effect",
+    uploadBtn: "Upload your own image", curBaseImg: "Current base image", customUploadPrefix: "Custom upload: ",
+    wandTitle: "Lens Physics Wand", sieBadge: "SIE ellipsoidal lens",
+    lensThetaE: "Einstein radius (θ<sub>E</sub>)",
+    lensQ: "Lens mass axis ratio (q)",
+    lensPA: "Lens orientation angle (PA)",
+    presetRing: "Symmetric ring", presetArc: "Stretched arc", resetFlat: "Reset to unlensed image",
+    missionTitle: "Goal: export your lens artwork",
+    missionDesc: "Drag on the canvas to warp the image with a gravitational lens, then export your artwork below to light up this stage's star!",
+    exportBtn: "Export lens artwork · Earn a star ⭐",
+    victoryTitle: "Cosmic Lensing Master · All Stages Cleared!",
+    victoryDesc: "Amazing! You have conquered all 3 stages — mastering the deep-field ring, the snow-mountain wormhole, and the hilarious stickman face warp!",
+    victoryFree: "Keep playing in free mode", victoryLab: "Enter the physics lab",
+    webglFail: "Your browser does not support WebGL. Please enable hardware acceleration or use a modern browser.",
+    stickmanTip: "Drag my big head with the lens! 👀",
+    wmStage: "⭐ Gravitational Lensing Quest · Stage {n} keepsake",
+    csRecordTitle: "Gravitational Lensing Quest · Stage {n} cleared",
+    csErr: "Platform API error",
+    stage1CfgName: "Stage 1 · Deep Star Sea", stage2CfgName: "Stage 2 · Natural Scenery", stage3CfgName: "Stage 3 · Gravity Selfie Stickman",
+    stage1Label: "Base image: Hubble Ultra Deep Field 2014 (official Hubble image)",
+    stage2Label: "Base image: snow mountains and lake scenery",
+    stage3Label: "Base image: stickman selfie portrait"
+  }
+};
+function T(k) { return (TXT[LANG] && TXT[LANG][k]) !== undefined ? TXT[LANG][k] : TXT.zh[k] ?? k; }
+
+/* 用户自定义上传的文件名 (null 表示当前展示内置关卡底图, 切语言时用于正确恢复底图标签) */
+let customImgName = null;
+
+/* 动态文案随语言刷新: 底图标签 / 平台账号徽章 / 关卡通关徽章 */
+function refreshDynamic() {
+  const lbl = document.getElementById("currentImgLabel");
+  if (lbl) lbl.textContent = customImgName ? `${T("customUploadPrefix")}${customImgName}` : STAGE_CONFIG[currentStage].label;
+  const csLogged = !!(window.CS_CONFIG && window.CsClient && sessionStorage.getItem(CsClient.storageKey));
+  const csText = document.getElementById("csBadgeText");
+  if (csText && !csLogged) csText.textContent = T("csNotLogged"); // 已登录时保留用户名, 不覆盖
+  const csB = document.getElementById("csBadge");
+  if (csB) csB.title = csLogged ? T("csLoggedTip") : T("csBadgeTip");
+  updateStarUI(); // 通关徽章文案随语言刷新
+}
+
+/* 应用语言到全部静态节点 (data-i18n=textContent / data-i18n-html=innerHTML / data-i18n-title=title 属性) */
+function applyLang(lang) {
+  LANG = lang;
+  localStorage.setItem("lensLang", lang);
+  document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+  document.title = T("title");
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = T(el.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-html]").forEach(el => { el.innerHTML = T(el.dataset.i18nHtml); });
+  document.querySelectorAll("[data-i18n-title]").forEach(el => { el.title = T(el.dataset.i18nTitle); });
+  // 语言开关高亮态
+  const be = document.getElementById("langEN"), bz = document.getElementById("langZH");
+  if (be && bz) {
+    be.classList.toggle("lang-on", lang === "en");
+    bz.classList.toggle("lang-on", lang === "zh");
+  }
+  refreshDynamic(); // 刷新全部动态文案
+}
 
 /* =====================================================================
  * WebGL 核心初始化与着色器设置
@@ -510,7 +642,7 @@ const gl = canvas.getContext('webgl', {
 });
 
 if (!gl) {
-  document.body.innerHTML = '<div class="p-8 text-center text-red-400">您的浏览器不支持 WebGL，请开启硬件加速或使用现代浏览器。</div>';
+  document.body.innerHTML = '<div class="p-8 text-center text-red-400">' + T('webglFail') + '</div>';
   throw new Error('WebGL not supported');
 }
 
@@ -727,7 +859,7 @@ function generateHubbleSpaceCanvas() {
   return c;
 }
 
-// 第 2 关：雪山星际风景画生成器
+// 第 2 关：雪山自然风景画生成器
 function generateLandscapeCanvas() {
   const c = document.createElement('canvas');
   c.width = 1600; c.height = 1000;
@@ -890,7 +1022,7 @@ function generateStickmanCanvas() {
   ctx.fillStyle = '#38bdf8';
   ctx.font = 'bold 36px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('用引力透镜拖我大头！👀', 500, 110);
+  ctx.fillText(T('stickmanTip'), 500, 110);
 
   return c;
 }
@@ -1163,8 +1295,9 @@ const completedStages = new Set();
 
 const STAGE_CONFIG = {
   1: {
-    name: '第一关 · 深空星海',
-    label: '当前底图: 哈勃极深场 2014 (Hubble Ultra Deep Field 官方原图)',
+    /* name/label 按当前语言动态取词 (getter 形式, 调用点无需改动) */
+    get name() { return T('stage1CfgName'); },
+    get label() { return T('stage1Label'); },
     generator: generateHubbleSpaceCanvas,
     onlineUrls: [
       // 1. 本地同级目录优先载入
@@ -1179,8 +1312,8 @@ const STAGE_CONFIG = {
     presetAng: 35
   },
   2: {
-    name: '第二关 · 星际风景',
-    label: '当前底图: 雪山与湖泊自然风景',
+    get name() { return T('stage2CfgName'); },
+    get label() { return T('stage2Label'); },
     generator: generateLandscapeCanvas,
     onlineUrls: [
       'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1600&q=80'
@@ -1190,8 +1323,8 @@ const STAGE_CONFIG = {
     presetAng: 20
   },
   3: {
-    name: '第三关 · 引力自拍火柴人',
-    label: '当前底图: 魔性火柴人大头人像',
+    get name() { return T('stage3CfgName'); },
+    get label() { return T('stage3Label'); },
     generator: generateStickmanCanvas,
     onlineUrls: [], // 直接使用高保真火柴人画布
     presetTE: 80,
@@ -1237,6 +1370,7 @@ function switchStage(stageNum) {
   }
 
   const cfg = STAGE_CONFIG[stageNum];
+  customImgName = null; // 切回内置底图, 清除自定义上传标记
   document.getElementById('currentImgLabel').textContent = cfg.label;
 
   // 设定该关推荐的透镜物理参数
@@ -1269,7 +1403,8 @@ document.getElementById('fileUploadInput').addEventListener('change', (e) => {
     const img = new Image();
     img.onload = () => {
       uploadImageToGL(img);
-      document.getElementById('currentImgLabel').textContent = `自定义上传: ${file.name}`;
+      customImgName = file.name;
+      document.getElementById('currentImgLabel').textContent = `${T('customUploadPrefix')}${file.name}`;
       playSynthSound('click');
     };
     img.src = ev.target.result;
@@ -1309,7 +1444,7 @@ function exportLensedImageAndEarnStar() {
 
   outCtx.fillStyle = '#ffffff';
   outCtx.font = `bold ${14 * dpr}px sans-serif`;
-  outCtx.fillText(`⭐ 引力透镜探险 · 第 ${currentStage} 关打卡纪念`, pad + 12 * dpr, h - pad - 18 * dpr);
+  outCtx.fillText(T('wmStage').replace('{n}', currentStage), pad + 12 * dpr, h - pad - 18 * dpr);
   outCtx.restore();
 
   // 2. 触发下载
@@ -1324,6 +1459,7 @@ function exportLensedImageAndEarnStar() {
   // 3. 点亮星星与关卡完成度
   completedStages.add(currentStage);
   updateStarUI();
+  csReportStageClear(dataURL); // 平台记录上报 (未登录静默跳过, 不阻塞通关流程)
 
   playSynthSound('star');
 
@@ -1362,7 +1498,7 @@ function updateStarUI() {
       starIcon.innerHTML = SOLID_STAR_SVG;
 
       // 打上已通关标签
-      badge.textContent = '已通关 ⭐';
+      badge.textContent = T('badgeDone');
       badge.className = 'text-[10px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold';
     } else {
       // 通关前：空心轮廓星
@@ -1373,10 +1509,10 @@ function updateStarUI() {
       starIcon.innerHTML = HOLLOW_STAR_SVG;
 
       if (currentStage === s) {
-        badge.textContent = '进行中';
+        badge.textContent = T('badgeDoing');
         badge.className = 'text-[10px] px-1.5 py-0.2 rounded bg-sky-500/10 text-sky-300 border border-sky-500/30';
       } else {
-        badge.textContent = '未通关';
+        badge.textContent = T('badgeTodo');
         badge.className = 'text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-500 border border-slate-700';
       }
     }
@@ -1443,9 +1579,74 @@ function renderLoop(now) {
 
 // 页面加载完成后启动
 window.onload = function () {
+  applyLang(LANG); // 按记忆语言初始化全部静态与动态文案
+  // 语言开关按钮 click 事件绑定
+  document.getElementById('langZH').addEventListener('click', () => applyLang('zh'));
+  document.getElementById('langEN').addEventListener('click', () => applyLang('en'));
   switchStage(1);
   requestAnimationFrame(renderLoop);
+  csInitBadge(); // 平台账号登录徽章初始化
 };
+
+/* =====================================================================
+ * 平台账号接入 (NADC Citizen Science)
+ * 依赖 config.js / cs-client.js (官方协议层, body 开头 <script> 引入):
+ *   - PKCE 登录回调统一在落地页 index.html 完成, 本页只读 sessionStorage 令牌
+ *   - 通关时上报记录: external_id = "stage-N" (同关重复通关覆盖为最新一条),
+ *     附件为带水印的打卡纪念图, 玩家可在门户「我的参与」中查看
+ * ===================================================================== */
+function csDescribe(value) {
+  if (value && typeof value === "object") {
+    if (typeof value.error_description === "string" && value.error_description) return value.error_description;
+    const nested = value.error;
+    if (nested && typeof nested === "object" && typeof nested.message === "string") return nested.message;
+    if (typeof value.message === "string") return value.message;
+  }
+  if (value instanceof Error) return value.message || String(value);
+  return typeof value === "string" ? value : T("csErr");
+}
+
+/* 登录徽章初始化: 未登录保持灰点默认态, 已登录绿点+用户名并禁用跳转 */
+async function csInitBadge() {
+  const cfg = window.CS_CONFIG;
+  if (!cfg || !window.CsClient) return;
+  const dot = document.getElementById("csBadgeDot");
+  const text = document.getElementById("csBadgeText");
+  const badge = document.getElementById("csBadge");
+  if (!sessionStorage.getItem(CsClient.storageKey)) return; // 未登录: 默认态即可
+  try {
+    const me = await CsClient.api(cfg, "/app/me", sessionStorage, fetch);
+    dot.className = "w-2 h-2 rounded-full bg-emerald-400 inline-block";
+    dot.style.boxShadow = "0 0 5px #34d399";
+    text.textContent = me.display_name || me.id || T("csLogged");
+    badge.removeAttribute("href");
+    badge.title = T("csLoggedTip");
+  } catch (err) {
+    // 访问令牌过期且刷新失败: 令牌彻底失效, 按未登录处理
+    sessionStorage.removeItem(CsClient.storageKey);
+  }
+}
+
+/* 通关记录上报 (fire-and-forget): JSON 记录 + 打卡纪念图附件 (multipart/form-data) */
+async function csReportStageClear(dataURL) {
+  try {
+    const cfg = window.CS_CONFIG;
+    if (!cfg || !window.CsClient) return;
+    if (!sessionStorage.getItem(CsClient.storageKey)) return; // 未登录不上报
+    const record = {
+      external_id: "stage-" + currentStage,
+      title: T("csRecordTitle").replace("{n}", currentStage),
+      played_at: new Date().toISOString(),
+    };
+    const blob = await (await fetch(dataURL)).blob();
+    const form = new FormData();
+    form.set("record", JSON.stringify(record));
+    form.append("attachments", blob, "stage_" + currentStage + "_artwork.jpg");
+    await CsClient.api(cfg, "/app/records", sessionStorage, fetch, { method: "POST", body: form });
+  } catch (err) {
+    console.warn("[CS] 通关记录上报失败:", err); // 上报失败不影响本地通关
+  }
+}
 </script>
 </body>
 </html>

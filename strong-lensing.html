@@ -183,6 +183,9 @@
 </style>
 </head>
 <body class="bg-cosmic-950 text-slate-100 min-h-screen selection:bg-cosmic-accent selection:text-white flex flex-col font-sans antialiased">
+<!-- 平台账号接入: 协议层与配置必须在主脚本之前加载 (主脚本立即读取 CsClient) -->
+<script src="./config.js"></script>
+<script src="./cs-client.js"></script>
 
 <!-- 深空氛围背景层 (纯装饰, 不参与交互) -->
 <div class="bg-atmosphere" aria-hidden="true"></div>
@@ -223,6 +226,18 @@
       <button onclick="resetDefault()" class="preset-chip p-1.5 text-xs rounded-lg bg-cosmic-850 hover:bg-red-500/20 text-slate-400 hover:text-red-400 border border-cosmic-700 transition" title="重置全部参数" data-i18n-title="resetTitle">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
       </button>
+      <!-- 平台账号 (NADC Citizen Science): 登录状态徽章 + 云端存档菜单 -->
+      <details id="csAuth" class="relative">
+        <summary id="csAuthBadge" class="list-none cursor-pointer px-2.5 py-1.5 text-xs font-medium rounded-lg bg-cosmic-800/80 border border-cosmic-600/50 text-slate-300 hover:border-cosmic-accent hover:text-white select-none whitespace-nowrap">
+          <span id="csAuthBadgeInner">…</span>
+        </summary>
+        <div id="csAuthMenu" class="hidden absolute right-0 top-full mt-2 z-50 w-56 glass-card rounded-xl p-2.5 flex flex-col gap-1.5">
+          <div id="csUserName" class="px-1.5 pb-1 text-xs font-semibold text-slate-200 border-b border-cosmic-700/60"></div>
+          <button id="csSaveBtn" class="text-left px-2 py-1.5 text-xs rounded-lg bg-cosmic-800/80 hover:bg-cosmic-700 text-slate-200"></button>
+          <button id="csRestoreBtn" class="text-left px-2 py-1.5 text-xs rounded-lg bg-cosmic-800/80 hover:bg-cosmic-700 text-slate-200"></button>
+          <button id="csLogoutBtn" class="text-left px-2 py-1.5 text-xs rounded-lg bg-cosmic-800/80 hover:bg-red-500/20 text-slate-400 hover:text-red-400"></button>
+        </div>
+      </details>
       <!-- 中英双语一键切换 (记忆于 localStorage) -->
       <div class="flex items-center rounded-lg overflow-hidden border border-cosmic-600 text-xs font-semibold" role="group" aria-label="Language switch">
         <button id="langZH" onclick="applyLang('zh')" class="lang-on px-2.5 py-1.5 bg-cosmic-800 text-slate-200">中文</button>
@@ -573,6 +588,10 @@ const TXT = {
     infoMirror: "主镜口径", infoExp: "单帧曝光", infoFrames: "帧",
     infoPixScale: "探测器像元尺度", infoNeSrc: "目标源未透镜总电子数",
     infoBkg: "背景水平", infoStretch: "显示拉伸",
+    csNotLogged: "未登录 · 点击登录", csLoggedAs: "平台账号", csHint: "登录后可保存/恢复参数",
+    csSaveCfg: "保存配置到云端", csRestoreCfg: "恢复云端配置", csLogout: "退出登录",
+    csSaved: "配置已保存到云端存档", csRestored: "已恢复云端配置", csNoCloud: "云端没有已保存的配置",
+    csSavedAt: "保存于", csErr: "平台接口错误",
     langBtnEN: "EN", langBtnZH: "中文"
   },
   en: {
@@ -629,6 +648,10 @@ const TXT = {
     infoMirror: "Mirror aperture", infoExp: "Exposure per frame", infoFrames: "frames",
     infoPixScale: "Detector pixel scale", infoNeSrc: "Unlensed source total electrons",
     infoBkg: "Background level", infoStretch: "Display stretch",
+    csNotLogged: "Not signed in · Click to sign in", csLoggedAs: "Platform account", csHint: "Sign in to save/restore parameters",
+    csSaveCfg: "Save config to cloud", csRestoreCfg: "Restore cloud config", csLogout: "Sign out",
+    csSaved: "Configuration saved to cloud save", csRestored: "Cloud configuration restored", csNoCloud: "No saved configuration in the cloud",
+    csSavedAt: "Saved at", csErr: "Platform API error",
     langBtnEN: "EN", langBtnZH: "中文"
   }
 };
@@ -658,6 +681,7 @@ function applyLang(lang) {
     bz.classList.toggle("lang-on", lang === "zh");
   }
   updateAll(); // 刷新全部动态文案 (Mock 状态/悬停卡/光路图)
+  if (window.renderCsAuth) window.renderCsAuth(); // 平台账号徽章文案随语言刷新
 }
 
 /* =====================================================================
@@ -1663,6 +1687,142 @@ attachTip(document.getElementById("mockCanvas"), () => MOCK_INFO);
 
 // 初始化渲染 (applyLang 内部会调用 updateAll, 并按 localStorage 记忆的语言刷新全部文案)
 applyLang(LANG);
+
+/* =====================================================================
+ * 平台账号接入 (NADC Citizen Science)
+ * 依赖 config.js / cs-client.js (官方协议层, 由页面末尾 <script> 引入):
+ *   - PKCE 登录回调统一在落地页 index.html 完成, 本页只读 sessionStorage 令牌
+ *   - 未登录: 徽章点击跳落地页登录
+ *   - 已登录: 徽章展开菜单 → 保存/恢复参数存档 (存档 key = "config")
+ * ===================================================================== */
+const CS_CFG = window.CS_CONFIG || null;
+const csAuth = document.getElementById("csAuth");
+const csBadgeInner = document.getElementById("csAuthBadgeInner");
+const csMenu = document.getElementById("csAuthMenu");
+const csUserName = document.getElementById("csUserName");
+let csMe = null;              // 当前登录用户 (/app/me 结果)
+let csHasSave = false;        // 云端是否存在 config 存档
+
+function csDescribe(value) {
+  if (value && typeof value === "object") {
+    if (typeof value.error_description === "string" && value.error_description) return value.error_description;
+    const nested = value.error;
+    if (nested && typeof nested === "object" && typeof nested.message === "string") return nested.message;
+    if (typeof value.message === "string") return value.message;
+  }
+  if (value instanceof Error) return value.message || String(value);
+  return typeof value === "string" ? value : T("csErr");
+}
+
+/* 徽章与菜单文案渲染 (applyLang 切语言时也会被调用) */
+window.renderCsAuth = function () {
+  if (!CS_CFG) return;
+  if (csMe) {
+    csBadgeInner.innerHTML = '<span class="inline-block w-2 h-2 rounded-full bg-emerald-400 mr-1.5" style="box-shadow:0 0 5px #34d399"></span>' +
+      (csMe.display_name || csMe.id || "…");
+  } else {
+    csBadgeInner.textContent = T("csNotLogged");
+  }
+  csUserName.textContent = csMe ? (T("csLoggedAs") + ": " + (csMe.display_name || csMe.id || "")) : T("csHint");
+  document.getElementById("csSaveBtn").textContent = T("csSaveCfg");
+  document.getElementById("csRestoreBtn").textContent = T("csRestoreCfg");
+  document.getElementById("csRestoreBtn").disabled = !csHasSave;
+  document.getElementById("csRestoreBtn").style.opacity = csHasSave ? "1" : "0.45";
+  document.getElementById("csLogoutBtn").textContent = T("csLogout");
+};
+
+/* 从输入框收集当前配置 (滑块原始值, sang/lang 保持度数单位; llight 为开关状态) */
+function csCollectConfig() {
+  const params = {};
+  for (const k of ids) params[k] = parseFloat(document.getElementById(k).value);
+  return { params: params, llight: document.getElementById("llight").checked, savedAt: new Date().toISOString() };
+}
+
+/* 把云端存档写回输入框并派发 input 事件 (触发滑块填充同步与 rAF 合批重绘) */
+function csApplyConfig(data) {
+  if (!data || !data.params) throw new Error("存档格式不正确");
+  for (const k of ids) {
+    const el = document.getElementById(k);
+    if (el && typeof data.params[k] === "number") {
+      el.value = data.params[k];
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+  }
+  const ll = document.getElementById("llight");
+  if (ll && ll.checked !== !!data.llight) {
+    ll.checked = !!data.llight;
+    ll.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+}
+
+/* 展开菜单时刷新云端存档存在性 (config 键是否存在决定恢复按钮可用态) */
+async function csRefreshSaveFlag() {
+  if (!csMe) return;
+  try {
+    const saves = await CsClient.api(CS_CFG, "/app/saves", sessionStorage, fetch);
+    csHasSave = Array.isArray(saves.keys) && saves.keys.includes("config");
+  } catch (err) {
+    csHasSave = false;
+  }
+  window.renderCsAuth();
+}
+
+csAuth.addEventListener("click", (ev) => {
+  if (!csMe) {
+    // 未登录: 阻止 details 展开, 直接跳落地页完成 PKCE 登录
+    if (!csAuth.open) { ev.preventDefault(); window.location.href = "index.html"; }
+    return;
+  }
+  if (!csAuth.open) csRefreshSaveFlag(); // 即将展开: 预取云端存档状态
+});
+
+document.getElementById("csSaveBtn").addEventListener("click", async () => {
+  try {
+    await CsClient.api(CS_CFG, "/app/saves/config", sessionStorage, fetch, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(csCollectConfig()),
+    });
+    csHasSave = true;
+    window.renderCsAuth();
+    csMenu.classList.add("hidden");
+    alert(T("csSaved"));
+  } catch (err) { alert(csDescribe(err)); }
+});
+
+document.getElementById("csRestoreBtn").addEventListener("click", async () => {
+  try {
+    const data = await CsClient.api(CS_CFG, "/app/saves/config", sessionStorage, fetch);
+    csApplyConfig(data);
+    csMenu.classList.add("hidden");
+    alert(T("csRestored"));
+  } catch (err) { alert(csDescribe(err)); }
+});
+
+document.getElementById("csLogoutBtn").addEventListener("click", async () => {
+  try {
+    await CsClient.logout(CS_CFG, sessionStorage, fetch);
+  } catch (err) { /* 平台吊销失败也不阻塞本地登出 */ }
+  csMe = null;
+  csHasSave = false;
+  csMenu.classList.add("hidden");
+  window.renderCsAuth();
+});
+
+/* 页面加载: sessionStorage 里有令牌则拉取用户信息, 401 时 client 内部自动续期 */
+(async function csInit() {
+  if (!CS_CFG) { csBadgeInner.textContent = ""; return; }
+  window.renderCsAuth();
+  const saved = sessionStorage.getItem(CsClient.storageKey);
+  if (!saved) { window.renderCsAuth(); return; }
+  try {
+    csMe = await CsClient.api(CS_CFG, "/app/me", sessionStorage, fetch);
+  } catch (err) {
+    csMe = null;                       // 刷新令牌也失效: 按未登录处理
+    sessionStorage.removeItem(CsClient.storageKey);
+  }
+  window.renderCsAuth();
+})();
 </script>
 </body>
 </html>
