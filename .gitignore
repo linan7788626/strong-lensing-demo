@@ -21,6 +21,13 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Archives / share packages (never commit)
+*.zip
+.trae-html-share-packages/
+
+# Python cache
+__pycache__/
+
 # OS temp
 Thumbs.db
 desktop.ini
