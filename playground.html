@@ -202,7 +202,7 @@
 <!-- 深空氛围背景层 (星云辉光 + 星点 + 噪点, 不参与交互) -->
 <div class="bg-atmosphere" aria-hidden="true"></div>
 
-<!-- 顶部导航栏与关卡星级 HUD -->
+<!-- 顶部导航栏与关卡进度 HUD -->
 <header class="sticky top-0 z-40 bg-cyber-950/85 backdrop-blur-md border-b border-cyber-700/60 px-4 lg:px-8 py-3.5">
   <div class="max-w-[1920px] mx-auto flex flex-wrap items-center justify-between gap-4">
     
@@ -226,7 +226,7 @@
     <div class="flex items-center gap-3.5">
       <!-- 三颗星收集进度 -->
       <div class="flex items-center gap-2.5 bg-cyber-900/90 border border-cyber-700 px-4 py-2 rounded-full shadow-inner">
-        <span class="text-sm text-slate-300 font-medium mr-1 hidden sm:inline" data-i18n="stageStarsLabel">关卡星级:</span>
+        <span class="text-sm text-slate-300 font-medium mr-1 hidden sm:inline" data-i18n="stageStarsLabel">关卡进度:</span>
         <div class="flex items-center gap-2">
           <!-- 星星 1 -->
           <span id="starSlot1" class="transition-all duration-300" title="关卡 1: 宇宙深场" data-i18n-title="starTip1">
@@ -257,7 +257,11 @@
       </button>
 
       <!-- 重置游戏进度 -->
-    <button onclick="resetGameProgress()" class="p-2.5 rounded-xl bg-cyber-850 hover:bg-cyber-800 border border-cyber-700 text-slate-400 hover:text-red-400 transition" title="重置全部星级与任务" data-i18n-title="resetProgressTip">
+    <!-- 返回门户首页 (index.html) -->
+    <a href="./index.html" class="p-2.5 rounded-xl bg-cyber-850 hover:bg-cyber-800 border border-cyber-700 text-slate-400 hover:text-cyber-accent transition" title="返回门户首页" data-i18n-title="homeTip">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2 2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+    </a>
+    <button onclick="resetGameProgress()" class="p-2.5 rounded-xl bg-cyber-850 hover:bg-cyber-800 border border-cyber-700 text-slate-400 hover:text-red-400 transition" title="重置全部进度与任务" data-i18n-title="resetProgressTip">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
     </button>
 
@@ -509,12 +513,13 @@ const TXT = {
     title: "星系透镜探索小游戏",
     backLab: "返回仿真实验室",
     challengeBadge: "3关挑战",
-    stageStarsLabel: "关卡星级:",
+    stageStarsLabel: "关卡进度:",
     starTip1: "关卡 1: 宇宙深场", starTip2: "关卡 2: 自然风景", starTip3: "关卡 3: 引力自拍",
     csBadgeTip: "平台账号登录状态, 点击前往登录页",
     csNotLogged: "未登录", csLogged: "已登录", csLoggedTip: "已通过平台账号登录",
     soundTip: "开启/静音音效",
-    resetProgressTip: "重置全部星级与任务",
+    resetProgressTip: "重置全部进度与任务",
+    homeTip: "返回门户首页",
     stage1Name: "第一关 · 宇宙深场",
     stage2Name: "第二关 · 自然风景",
     stage3Name: "第三关 · 引力自拍",
@@ -536,6 +541,7 @@ const TXT = {
     stickmanTip: "用引力透镜拖我大头！👀",
     wmStage: "⭐ 引力透镜探险 · 第 {n} 关打卡纪念",
     csRecordTitle: "引力透镜探险 · 第 {n} 关通关",
+    csGameClearTitle: "引力透镜探险 · 三关全部通关 🏆",
     csErr: "平台接口错误",
     stage1CfgName: "第一关 · 深空星海", stage2CfgName: "第二关 · 自然风景", stage3CfgName: "第三关 · 引力自拍火柴人",
     stage1Label: "当前底图: 哈勃极深场 2014 (Hubble Ultra Deep Field 官方原图)",
@@ -546,13 +552,14 @@ const TXT = {
     title: "Galaxy Lens Quest",
     backLab: "Back to Simulation Lab",
     challengeBadge: "3-Stage Challenge",
-    stageStarsLabel: "Stage stars:",
+    stageStarsLabel: "Stage progress:",
     starTip1: "Stage 1: Deep Field", starTip2: "Stage 2: Natural Scenery", starTip3: "Stage 3: Gravity Selfie",
     csBadgeTip: "Platform account status, click to go to the sign-in page",
     csNotLogged: "Sign in", csLogged: "Signed in", csLoggedTip: "Signed in with platform account",
     soundTip: "Enable / mute sound",
-    resetProgressTip: "Reset all stars and missions",
+    resetProgressTip: "Reset all progress and missions",
     stage1Name: "Stage 1 · Deep Field",
+    homeTip: "Back to portal home",
     stage2Name: "Stage 2 · Natural Scenery",
     stage3Name: "Stage 3 · Gravity Selfie",
     badgeTodo: "Not cleared", badgeDoing: "In progress", badgeDone: "Cleared ⭐",
@@ -573,6 +580,7 @@ const TXT = {
     stickmanTip: "Drag my big head with the lens! 👀",
     wmStage: "⭐ Gravitational Lensing Quest · Stage {n} keepsake",
     csRecordTitle: "Gravitational Lensing Quest · Stage {n} cleared",
+    csGameClearTitle: "Gravitational Lensing Quest · All 3 stages cleared 🏆",
     csErr: "Platform API error",
     stage1CfgName: "Stage 1 · Deep Star Sea", stage2CfgName: "Stage 2 · Natural Scenery", stage3CfgName: "Stage 3 · Gravity Selfie Stickman",
     stage1Label: "Base image: Hubble Ultra Deep Field 2014 (official Hubble image)",
@@ -1447,8 +1455,9 @@ function exportLensedImageAndEarnStar() {
 
   playSynthSound('star');
 
-  // 如果达到 3 颗星全满，弹出荣誉表彰弹窗
+  // 如果达到 3 颗星全满，弹出荣誉表彰弹窗并上报总通关记录
   if (completedStages.size === 3) {
+    csReportGameClear(); // 平台总通关记录 (未登录静默跳过)
     setTimeout(() => {
       document.getElementById('victoryModal').classList.remove('hidden');
     }, 700);
@@ -1621,6 +1630,9 @@ async function csReportStageClear(dataURL) {
       external_id: "stage-" + currentStage,
       title: T("csRecordTitle").replace("{n}", currentStage),
       played_at: new Date().toISOString(),
+      stage: currentStage,                       // 本关编号
+      stars: completedStages.size,               // 累计点亮星数 (即当前关卡进度, 上报前已含本关)
+      progress: completedStages.size + "/3",     // 进度文本, 便于门户列表直读
     };
     const blob = await (await fetch(dataURL)).blob();
     const form = new FormData();
@@ -1629,6 +1641,27 @@ async function csReportStageClear(dataURL) {
     await CsClient.api(cfg, "/app/records", sessionStorage, fetch, { method: "POST", body: form });
   } catch (err) {
     console.warn("[CS] 通关记录上报失败:", err); // 上报失败不影响本地通关
+  }
+}
+
+/* 三关全部通关记录上报 (fire-and-forget): 总通关记录, 无附件, 携带满星进度 */
+async function csReportGameClear() {
+  try {
+    const cfg = window.CS_CONFIG;
+    if (!cfg || !window.CsClient) return;
+    if (!sessionStorage.getItem(CsClient.storageKey)) return; // 未登录不上报
+    const record = {
+      external_id: "game-cleared",
+      title: T("csGameClearTitle"),
+      played_at: new Date().toISOString(),
+      stars: 3,
+      progress: "3/3",
+    };
+    const form = new FormData();
+    form.set("record", JSON.stringify(record));
+    await CsClient.api(cfg, "/app/records", sessionStorage, fetch, { method: "POST", body: form });
+  } catch (err) {
+    console.warn("[CS] 全通关记录上报失败:", err); // 上报失败不影响本地表彰弹窗
   }
 }
 </script>

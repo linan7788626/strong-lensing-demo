@@ -87,6 +87,7 @@
     </div>
     <button id="btnLogin" type="button" class="primary" style="display:none" data-i18n="btnLogin">使用平台账号登录</button>
     <button id="btnLogout" type="button" style="display:none" data-i18n="btnLogout">退出登录</button>
+    <button id="btnExit" type="button" data-i18n="btnExit">返回公众科学首页</button>
     <p id="authMsg"></p>
   </div>
 
@@ -98,7 +99,7 @@
     </a>
     <a class="card" href="./playground.html">
       <h2 data-i18n="card2Title">星系透镜探险</h2>
-      <p data-i18n="card2Desc">游戏化闯关模式：用实时透镜特效把扭曲的像「复原」成源星系，三关挑战逐步进阶，成绩可记入你的参与记录。</p>
+      <p data-i18n="card2Desc">游戏化闯关：把宇宙深场、雪山湖泊甚至你自己的照片送进引力透镜，拖动参数玩转爱因斯坦环，收集星级打卡通关，成绩可记入参与记录。</p>
       <span class="go" data-i18n="card2Go">开始闯关 →</span>
     </a>
   </div>
@@ -123,6 +124,7 @@
       sub: "强引力透镜物理演示与游戏化闯关 · 中国虚拟天文台公众科学平台应用",
       btnLogin: "使用平台账号登录",
       btnLogout: "退出登录",
+      btnExit: "返回公众科学首页",
       checking: "检查登录状态…",
       loggedOut: "未登录 — 登录后可保存参数配置并累计闯关记录",
       loggedIn: "已通过平台账号登录",
@@ -130,7 +132,7 @@
       card1Desc: "源平面、透镜平面、Mock 巡天观测三画布实时联动，拖动参数观察爱因斯坦环、像拓扑与光路剖面，可叠加仪器效应模拟真实巡天成像。",
       card1Go: "进入实验室 →",
       card2Title: "星系透镜探险",
-      card2Desc: "游戏化闯关模式：用实时透镜特效把扭曲的像「复原」成源星系，三关挑战逐步进阶，成绩可记入你的参与记录。",
+      card2Desc: "游戏化闯关：把宇宙深场、雪山湖泊甚至你自己的照片送进引力透镜，拖动参数玩转爱因斯坦环，收集星级打卡通关，成绩可记入参与记录。",
       card2Go: "开始闯关 →",
       footer: "登录由 NADC 通行证提供（oauth.china-vo.org）。你的参与记录保存在本平台，可在门户「我的参与」中查看。",
       loginOk: "登录成功，令牌已就绪",
@@ -143,6 +145,7 @@
       sub: "Strong lensing physics demo & gamified challenges · A China-VO Citizen Science app",
       btnLogin: "Sign in with platform account",
       btnLogout: "Sign out",
+      btnExit: "Back to Citizen Science Portal",
       checking: "Checking sign-in status…",
       loggedOut: "Not signed in — sign in to save your configuration and track challenge records",
       loggedIn: "Signed in with platform account",
@@ -150,7 +153,7 @@
       card1Desc: "Three linked canvases (source plane, lens plane, mock survey) update in real time. Drag parameters to watch Einstein rings, image topology and ray paths, and overlay instrument effects to simulate real survey imaging.",
       card1Go: "Enter the lab →",
       card2Title: "Galaxy Lens Quest",
-      card2Desc: "Gamified challenges: restore the distorted images back to the source galaxy with live lensing effects. Three stages of increasing difficulty, with results saved to your participation records.",
+      card2Desc: "Gamified challenges: send deep-field galaxies, mountain lakes — or your own photos — through a gravitational lens. Tune the lens to bend them into Einstein rings, collect stars for each stage, and save your results to the participation records.",
       card2Go: "Start the quest →",
       footer: "Sign-in is provided by the NADC passport (oauth.china-vo.org). Your participation records are stored on this platform and can be viewed under \"My Participation\" in the portal.",
       loginOk: "Signed in, token ready",
@@ -258,6 +261,11 @@
     CsClient.logout(window.CS_CONFIG, sessionStorage, fetch)
       .then(() => { renderLoggedOut(); setMsg(T("logoutOk")); })
       .catch((err) => setMsg(describe(err), true));
+  });
+
+  /* 返回公众科学平台首页: 由 platformApiBase 去掉 /api/v1 后缀推导 (config.js 修改后自动跟随) */
+  document.getElementById("btnExit").addEventListener("click", () => {
+    window.location.assign(String(window.CS_CONFIG.platformApiBase).replace(/\/api\/v1\/?$/, ""));
   });
 
   /* OAuth 回调：带 state 的授权码（本地登录）或无 state 的门户启动码 */

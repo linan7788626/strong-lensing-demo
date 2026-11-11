@@ -237,6 +237,10 @@
           <button id="csLogoutBtn" class="text-left px-2 py-1.5 text-xs rounded-lg bg-cosmic-800/80 hover:bg-red-500/20 text-slate-400 hover:text-red-400"></button>
         </div>
       </details>
+      <!-- 返回门户首页 (index.html) -->
+      <a href="./index.html" class="btn-press inline-flex items-center justify-center w-8 h-8 rounded-lg border border-cosmic-600 bg-cosmic-800 text-slate-300 hover:text-cosmic-accent hover:border-cosmic-accent/60 transition" title="返回门户首页" data-i18n-title="homeTip">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2 2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+      </a>
       <!-- 中英双语一键切换 (记忆于 localStorage) -->
       <div class="flex items-center rounded-lg overflow-hidden border border-cosmic-600 text-xs font-semibold" role="group" aria-label="Language switch">
         <button id="langZH" onclick="applyLang('zh')" class="lang-on px-2.5 py-1.5 bg-cosmic-800 text-slate-200">中文</button>
@@ -547,7 +551,7 @@ const TXT = {
     srcViewLabel: "平面显示内容:",
     viewLight: "源光亮度图", viewContour: "半光半径等高线",
     srcX: "源位置 X (βx)", srcY: "源位置 Y (βy)",
-    srcMag: "源星等 (m_AB)", srcSize: "源尺寸 (R_e)",
+    srcMag: "源星等 (m_AB)", srcSize: "源尺寸 (R_e)", homeTip: "返回门户首页",
     srcQ: "源轴比 (q_src)", srcPA: "方位角 (PA)",
     lensTitle: "透镜平面", lensSpace: "θ 空间 (±10″)",
     lensDrag: "点拖移动透镜中心",
@@ -605,7 +609,7 @@ const TXT = {
     srcViewLabel: "Display mode:",
     viewLight: "Surface brightness", viewContour: "Half-light contours",
     srcX: "Source X (βx)", srcY: "Source Y (βy)",
-    srcMag: "Source magnitude (m_AB)", srcSize: "Source size (R_e)",
+    srcMag: "Source magnitude (m_AB)", srcSize: "Source size (R_e)", homeTip: "Back to portal home",
     srcQ: "Source axis ratio (q_src)", srcPA: "Position angle (PA)",
     lensTitle: "Lens Plane", lensSpace: "θ-space (±10″)",
     lensDrag: "Drag to move lens center",
