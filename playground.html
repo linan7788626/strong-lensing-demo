@@ -206,13 +206,8 @@
 <header class="sticky top-0 z-40 bg-cyber-950/85 backdrop-blur-md border-b border-cyber-700/60 px-4 lg:px-8 py-3.5">
   <div class="max-w-[1920px] mx-auto flex flex-wrap items-center justify-between gap-4">
     
-    <!-- 返回实验室与主标题 -->
+    <!-- 主标题与徽标 (返回实验室按钮移至右侧, 与仿真实验室页的 Playground CTA 镜像) -->
     <div class="flex items-center gap-3.5">
-      <a href="strong-lensing.html" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-cyber-850 hover:bg-cyber-800 border border-cyber-700 text-sm text-cyber-accent font-medium transition hover:border-cyber-accent/60 shadow-sm">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-        <span data-i18n="backLab">返回仿真实验室</span>
-      </a>
-      <div class="h-6 w-px bg-cyber-700/60 hidden sm:block"></div>
       <div class="logo-ring" title="Cosmic Lensing Quest"></div>
       <div class="flex items-center gap-2.5">
         <h1 class="text-lg sm:text-xl font-bold bg-gradient-to-r from-sky-200 via-indigo-100 to-purple-300 bg-clip-text text-transparent" data-i18n="title">
@@ -225,7 +220,7 @@
     <!-- 星星收集度成就仪表盘与音效开关 -->
     <div class="flex items-center gap-3.5">
       <!-- 三颗星收集进度 -->
-      <div class="flex items-center gap-2.5 bg-cyber-900/90 border border-cyber-700 px-4 py-2 rounded-full shadow-inner">
+      <div class="flex items-center gap-2.5 h-10 bg-cyber-900/90 border border-cyber-700 px-4 rounded-full shadow-inner">
         <span class="text-sm text-slate-300 font-medium mr-1 hidden sm:inline" data-i18n="stageStarsLabel">关卡进度:</span>
         <div class="flex items-center gap-2">
           <!-- 星星 1 -->
@@ -245,31 +240,38 @@
       </div>
 
       <!-- 平台账号登录状态 (NADC Citizen Science): 未登录点击跳落地页, 已登录显示用户名 -->
-      <a id="csBadge" href="index.html" class="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-cyber-850 border border-cyber-700 text-xs font-medium text-slate-400 hover:text-white hover:border-sky-500 transition whitespace-nowrap" title="平台账号登录状态, 点击前往登录页">
+      <a id="csBadge" href="index.html" class="flex items-center gap-1.5 h-10 px-3 rounded-xl bg-cyber-850 border border-cyber-700 text-xs font-medium text-slate-400 hover:text-white hover:border-sky-500 transition whitespace-nowrap" title="平台账号登录状态, 点击前往登录页">
         <span id="csBadgeDot" class="w-2 h-2 rounded-full bg-slate-500 inline-block"></span>
         <span id="csBadgeText">未登录</span>
       </a>
 
       <!-- 音效开关 -->
-      <button id="soundToggle" onclick="toggleAudio()" class="p-2.5 rounded-xl bg-cyber-850 hover:bg-cyber-800 border border-cyber-700 text-slate-300 hover:text-white transition" title="开启/静音音效" data-i18n-title="soundTip">
+      <button id="soundToggle" onclick="toggleAudio()" class="h-10 p-2 inline-flex items-center justify-center rounded-xl bg-cyber-850 hover:bg-cyber-800 border border-cyber-700 text-slate-300 hover:text-white transition" title="开启/静音音效" data-i18n-title="soundTip">
         <svg id="soundIconOn" class="w-5 h-5 text-cyber-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
         <svg id="soundIconOff" class="w-5 h-5 text-slate-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/></svg>
       </button>
 
       <!-- 重置游戏进度 -->
-    <!-- 返回门户首页 (index.html) -->
-    <a href="./index.html" class="p-2.5 rounded-xl bg-cyber-850 hover:bg-cyber-800 border border-cyber-700 text-slate-400 hover:text-cyber-accent transition" title="返回门户首页" data-i18n-title="homeTip">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2 2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-    </a>
-    <button onclick="resetGameProgress()" class="p-2.5 rounded-xl bg-cyber-850 hover:bg-cyber-800 border border-cyber-700 text-slate-400 hover:text-red-400 transition" title="重置全部进度与任务" data-i18n-title="resetProgressTip">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-    </button>
+      <button onclick="resetGameProgress()" class="h-10 p-2 inline-flex items-center justify-center rounded-xl bg-cyber-850 hover:bg-cyber-800 border border-cyber-700 text-slate-400 hover:text-red-400 transition" title="重置全部进度与任务" data-i18n-title="resetProgressTip">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+      </button>
+
+      <!-- 返回门户首页 (index.html) -->
+      <a href="./index.html" class="h-10 p-2 inline-flex items-center justify-center rounded-xl bg-cyber-850 hover:bg-cyber-800 border border-cyber-700 text-slate-400 hover:text-cyber-accent transition" title="返回门户首页" data-i18n-title="homeTip">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2 2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+      </a>
 
       <!-- 中英双语一键切换 (记忆于 localStorage, 键名与仿真实验室页联动) -->
-      <div class="flex items-center rounded-lg overflow-hidden border border-cyber-700 text-xs font-semibold" role="group" aria-label="Language switch">
-        <button id="langZH" class="lang-on px-2.5 py-1.5 bg-cyber-800 text-slate-200">中文</button>
-        <button id="langEN" class="px-2.5 py-1.5 bg-cyber-850 text-slate-400 hover:text-slate-100">EN</button>
+      <div class="flex items-center h-10 rounded-lg overflow-hidden border border-cyber-700 text-xs font-semibold" role="group" aria-label="Language switch">
+        <button id="langZH" class="lang-on h-full px-3 bg-cyber-800 text-slate-200">中文</button>
+        <button id="langEN" class="h-full px-3 bg-cyber-850 text-slate-400 hover:text-slate-100">EN</button>
       </div>
+
+      <!-- 返回仿真实验室 (与仿真实验室页的 Playground CTA 同款渐变胶囊, 镜像布局) -->
+      <a href="strong-lensing.html" class="btn-press ml-2 inline-flex items-center gap-1.5 h-10 px-3.5 text-xs font-semibold rounded-lg bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-md shadow-sky-500/25 hover:shadow-lg hover:shadow-sky-500/40 hover:from-sky-400 hover:to-indigo-500 group">
+        <span data-i18n="backLab">返回仿真实验室</span>
+        <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+      </a>
   </div>
 
 </div>

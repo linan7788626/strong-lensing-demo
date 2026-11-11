@@ -222,12 +222,9 @@
       <button onclick="applyPreset('cross')" class="preset-chip px-2.5 py-1 text-xs font-medium rounded-lg bg-cosmic-800/80 hover:bg-cosmic-700 text-slate-200 border border-cosmic-600/50 hover:border-cosmic-accent hover:text-white" data-i18n="presetCross">十字四像</button>
       <button onclick="applyPreset('ring')" class="preset-chip px-2.5 py-1 text-xs font-medium rounded-lg bg-cosmic-800/80 hover:bg-cosmic-700 text-slate-200 border border-cosmic-600/50 hover:border-cosmic-accent hover:text-white" data-i18n="presetRing">爱因斯坦环</button>
       <button onclick="applyPreset('double')" class="preset-chip px-2.5 py-1 text-xs font-medium rounded-lg bg-cosmic-800/80 hover:bg-cosmic-700 text-slate-200 border border-cosmic-600/50 hover:border-cosmic-accent hover:text-white" data-i18n="presetDouble">经典双像</button>
-      <button onclick="resetDefault()" class="preset-chip p-1.5 text-xs rounded-lg bg-cosmic-850 hover:bg-red-500/20 text-slate-400 hover:text-red-400 border border-cosmic-700 transition" title="重置全部参数" data-i18n-title="resetTitle">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-      </button>
       <!-- 平台账号 (NADC Citizen Science): 登录状态徽章 + 云端存档菜单 -->
       <details id="csAuth" class="relative">
-        <summary id="csAuthBadge" class="list-none cursor-pointer px-2.5 py-1.5 text-xs font-medium rounded-lg bg-cosmic-800/80 border border-cosmic-600/50 text-slate-300 hover:border-cosmic-accent hover:text-white select-none whitespace-nowrap">
+        <summary id="csAuthBadge" class="list-none cursor-pointer h-8 px-2.5 flex items-center text-xs font-medium rounded-lg bg-cosmic-800/80 border border-cosmic-600/50 text-slate-300 hover:border-cosmic-accent hover:text-white select-none whitespace-nowrap">
           <span id="csAuthBadgeInner">…</span>
         </summary>
         <div id="csAuthMenu" class="hidden absolute right-0 top-full mt-2 z-50 w-56 glass-card rounded-xl p-2.5 flex flex-col gap-1.5">
@@ -237,16 +234,21 @@
           <button id="csLogoutBtn" class="text-left px-2 py-1.5 text-xs rounded-lg bg-cosmic-800/80 hover:bg-red-500/20 text-slate-400 hover:text-red-400"></button>
         </div>
       </details>
+      <!-- 重置全部参数 -->
+      <button onclick="resetDefault()" class="preset-chip inline-flex items-center justify-center w-8 h-8 rounded-lg bg-cosmic-850 hover:bg-red-500/20 text-slate-400 hover:text-red-400 border border-cosmic-700 transition" title="重置全部参数" data-i18n-title="resetTitle">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+      </button>
       <!-- 返回门户首页 (index.html) -->
       <a href="./index.html" class="btn-press inline-flex items-center justify-center w-8 h-8 rounded-lg border border-cosmic-600 bg-cosmic-800 text-slate-300 hover:text-cosmic-accent hover:border-cosmic-accent/60 transition" title="返回门户首页" data-i18n-title="homeTip">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2 2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
       </a>
       <!-- 中英双语一键切换 (记忆于 localStorage) -->
-      <div class="flex items-center rounded-lg overflow-hidden border border-cosmic-600 text-xs font-semibold" role="group" aria-label="Language switch">
-        <button id="langZH" onclick="applyLang('zh')" class="lang-on px-2.5 py-1.5 bg-cosmic-800 text-slate-200">中文</button>
-        <button id="langEN" onclick="applyLang('en')" class="px-2.5 py-1.5 bg-cosmic-850 text-slate-400 hover:text-slate-100">EN</button>
+      <div class="flex items-center h-8 rounded-lg overflow-hidden border border-cosmic-600 text-xs font-semibold" role="group" aria-label="Language switch">
+        <button id="langZH" onclick="applyLang('zh')" class="lang-on h-full px-2.5 bg-cosmic-800 text-slate-200">中文</button>
+        <button id="langEN" onclick="applyLang('en')" class="h-full px-2.5 bg-cosmic-850 text-slate-400 hover:text-slate-100">EN</button>
       </div>
-      <a href="playground.html" class="btn-press ml-2 inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/25 hover:shadow-lg hover:shadow-blue-500/40 hover:from-blue-500 hover:to-indigo-500 group">
+      <!-- 星系透镜探险 CTA -->
+      <a href="playground.html" class="btn-press ml-2 inline-flex items-center gap-1.5 h-8 px-3 text-xs font-semibold rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/25 hover:shadow-lg hover:shadow-blue-500/40 hover:from-blue-500 hover:to-indigo-500 group">
         <span>Playground</span>
         <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
       </a>
